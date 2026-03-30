@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WOA Troop Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --bg: #07111f;
+      --panel: #0f1b2d;
+      --panel2: #12233b;
+      --text: #eaf2ff;
+      --muted: #9fb3d2;
+      --gold: #d5a84e;
+      --green: #16a34a;
+      --orange: #f59e0b;
+      --red: #ef4444;
+      --blue: #60a5fa;
+      --border: rgba(255,255,255,.09);
+      --shadow: 0 18px 45px rgba(0,0,0,.28);
+      --radius: 18px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      color: var(--text);
+      font-family: Inter, Segoe UI, Arial, sans-serif;
+      background:
+        radial-gradient(circle at top right, rgba(96,165,250,.12), transparent 28%),
+        radial-gradient(circle at top left, rgba(213,168,78,.10), transparent 25%),
+        var(--bg);
+    }
+
+    .container {
+      width: min(1480px, 95vw);
+      margin: 24px auto 48px;
+    }
+
+    .hero {
+      background: linear-gradient(135deg, rgba(213,168,78,.12), rgba(96,165,250,.08));
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 24px 28px;
+      box-shadow: var(--shadow);
+      display: grid;
+      gap: 14px;
+    }
+
+    .hero small {
+      color: var(--gold);
+      font-weight: 800;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+    }
+
+    .hero h1 {
+      margin: 0;
+      font-size: clamp(1.8rem, 3vw, 2.8rem);
+    }
+
+    .hero p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    .toolbar {
+      display: grid;
+      grid-template-columns: 1.1fr 1fr 1fr auto auto;
+      gap: 12px;
+      align-items: end;
+    }
+
+    .field {
+      display: grid;
+      gap: 6px;
+    }
+
+    .field label {
+      color: var(--muted);
+      font-size: .92rem;
+    }
+
+    input, select, button {
+      width: 100%;
+      background: var(--panel);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 14px;
+      font-size: .98rem;
+    }
+
+    button {
+      cursor: pointer;
+      width: auto;
+      border: 0;
+      font-weight: 800;
+    }
+
+    .btn-gold {
+      background: linear-gradient(135deg, var(--gold), #f2d089);
+      color: #1a1a1a;
+      box-shadow: var(--shadow);
+    }
+
+    .btn-panel {
+      background: var(--panel2);
+      color: var(--text);
+    }
+
+    .grid-kpi {
+      display: grid;
+      grid-template-columns: repeat(8, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 20px;
+    }
+
+    .card {
+      background: linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.01));
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 18px;
+    }
+
+    .kpi .label {
+      color: var(--muted);
+      font-size: .88rem;
+    }
+
+    .kpi .value {
+      font-size: clamp(1.4rem, 2vw, 2.1rem);
+      font-weight: 800;
+      margin-top: 8px;
+    }
+
+    .kpi .hint {
+      color: var(--muted);
+      font-size: .82rem;
+      margin-top: 8px;
+    }
+
+    .section-title {
+      margin: 28px 0 10px;
+      font-size: 1.2rem;
+    }
+
+    .charts {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .chart-card h3, .table-card h3 {
+      margin: 0 0 4px 0;
+      font-size: 1.02rem;
+    }
+
+    .sub {
+      color: var(--muted);
+      font-size: .88rem;
+      margin-bottom: 12px;
+    }
+
+    .chart-wrap {
+      position: relative;
+      height: 320px;
+    }
+
+    .tables {
+      display: grid;
+      grid-template-columns: 1.3fr .7fr;
+      gap: 16px;
+      margin-top: 18px;
+    }
+
+    .table-container {
+      overflow: auto;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.015);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 960px;
+    }
+
+    .mini-table {
+      min-width: unset;
+    }
+
+    th, td {
+      padding: 12px;
+      border-bottom: 1px solid rgba(255,255,255,.06);
+      text-align: left;
+      font-size: .92rem;
+    }
+
+    th {
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      background: #102036;
+      color: #dbeafe;
+    }
+
+    tbody tr:hover {
+      background: rgba(255,255,255,.035);
+    }
+
+    .right { text-align: right; }
+    .center { text-align: center; }
+
+    .badge {
+      display: inline-block;
+      border-radius: 999px;
+      padding: 4px 10px;
+      font-size: .76rem;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .green-b {
+      background: rgba(22,163,74,.16);
+      color: #86efac;
+    }
+
+    .orange-b {
+      background: rgba(245,158,11,.16);
+      color: #fcd34d;
+    }
+
+    .red-b {
+      background: rgba(239,68,68,.16);
+      color: #fca5a5;
+    }
+
+    .top1 {
+      background: rgba(213,168,78,.20);
+    }
+
+    .top10 {
+      background: rgba(22,163,74,.10);
+    }
+
+    .notice {
+      margin-top: 14px;
+      color: var(--muted);
+      font-size: .84rem;
+    }
+
+    @media (max-width: 1300px) {
+      .grid-kpi {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
+      .charts, .tables {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .toolbar {
+        grid-template-columns: 1fr;
+      }
+      .grid-kpi {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <section class="hero">
+    <small>WOA Command Center</small>
+    <h1>Troop &amp; Player Survey Dashboard</h1>
+    <p>Leadership view for troop strength, crypt standards, modernization progress, monster boosts, and ranking. Top 10 rows are highlighted. Dashboard auto-refreshes every 60 seconds.</p>
+
+    <div class="toolbar">
+      <div class="field">
+        <label for="search">Search player</label>
+        <input id="search" placeholder="Type player name..." />
+      </div>
+
+      <div class="field">
+        <label for="clanFilter">Clan</label>
+        <select id="clanFilter"></select>
+      </div>
+
+      <div class="field">
+        <label for="tierFilter">Player band</label>
+        <select id="tierFilter">
+          <option value="All">All</option>
+          <option value="Strong">Strong</option>
+          <option value="Mid">Mid</option>
+          <option value="Small">Small</option>
+        </select>
+      </div>
+
+      <button id="resetBtn" class="btn-panel">Reset Filters</button>
+      <button id="exportBtn" class="btn-gold">Export CSV</button>
+    </div>
+  </section>
+
+  <section class="grid-kpi" id="kpiGrid"></section>
+
+  <h2 class="section-title">Dashboard Views</h2>
+
+  <section class="charts">
+    <div class="card chart-card">
+      <h3>Player Strength Overview</h3>
+      <div class="sub">Strong = G8–G9, Mid = G6–G7, Small = G1–G5.</div>
+      <div class="chart-wrap"><canvas id="tierChart"></canvas></div>
+    </div>
+
+    <div class="card chart-card">
+      <h3>Troop Level Distribution</h3>
+      <div class="sub">How many players currently sit at each Guards, Specialists, Monsters, and Engineer level.</div>
+      <div class="chart-wrap"><canvas id="troopChart"></canvas></div>
+    </div>
+
+    <div class="card chart-card">
+      <h3>Crypt Level Milestones</h3>
+      <div class="sub">Exact counts at Crypt 20, 25, 30, and 35. Less than 20 needs attention.</div>
+      <div class="chart-wrap"><canvas id="cryptChart"></canvas></div>
+    </div>
+
+    <div class="card chart-card">
+      <h3>Mighty Overview</h3>
+      <div class="sub">Top 10 mighty accounts in the current filtered view.</div>
+      <div class="chart-wrap"><canvas id="mightyChart"></canvas></div>
+    </div>
+
+    <div class="card chart-card">
+      <h3>Army Modernization Progress</h3>
+      <div class="sub">Number of players at each modernization level so leadership can see where to push next.</div>
+      <div class="chart-wrap"><canvas id="armyChart"></canvas></div>
+    </div>
+
+    <div class="card chart-card">
+      <h3>Monsters Boost Progress</h3>
+      <div class="sub">Number of players at each monsters boost level so leadership can target the bottleneck.</div>
+      <div class="chart-wrap"><canvas id="monsterBoostChart"></canvas></div>
+    </div>
+  </section>
+
+  <section class="tables">
+    <div class="card table-card">
+      <h3>Power Ranking</h3>
+      <div class="sub">Ranked primarily by Guards Level, then Mighty. Clan column removed as requested.</div>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Player</th>
+              <th>Tier</th>
+              <th class="center">Guards</th>
+              <th class="center">Specialists</th>
+              <th class="center">Monsters</th>
+              <th class="center">Engineer</th>
+              <th class="center">Crypt</th>
+              <th class="right">Mighty</th>
+              <th class="center">Captain Level</th>
+              <th class="center">Hero Level</th>
+            </tr>
+          </thead>
+          <tbody id="powerTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card table-card">
+      <h3>Needs Attention</h3>
+      <div class="sub">Only players below clan minimum are shown here. No duplicates. No leader rows.</div>
+      <div class="table-container">
+        <table class="mini-table">
+          <thead>
+            <tr>
+              <th>Player</th>
+              <th>Status</th>
+              <th>Reason</th>
+            </tr>
+          </thead>
+          <tbody id="watchTableBody"></tbody>
+        </table>
+      </div>
+      <div class="notice" id="smallDataNotice"></div>
+    </div>
+  </section>
+</div>
+
+<script>
+const DATA_SOURCE_URL = "";
+const AUTO_REFRESH_MS = 60000;
+
+const EMBEDDED_DATA = [
+  {
+    "Timestamp": "2026-03-30 08:09:08.155000",
+    "Player In-Game Name": "McCooks",
+    "Which Clan are you?": "[WoA] Warriors of Asgard",
+    "Guards Level": 7,
+    "Specialist Level": 7,
+    "Monster Level": 7,
+    "Engineer (Catapults) Level": 7,
+    "Crypt Level": 30,
+    "Army Modernization Strength": "Level IV completed",
+    "Monsters Boost Strength": "Level II completed",
+    "Mighty Level": 298535,
+    "Hero Level": 220,
+    "Main Battle Captain Level": 257
+  },
+  {
+    "Timestamp": "2026-03-30 08:10:08.155000",
+    "Player In-Game Name": "Foxy",
+    "Which Clan are you?": "[WoA] Warriors of Asgard",
+    "Guards Level": 8,
+    "Specialist Level": 7,
+    "Monster Level": 7,
+    "Engineer (Catapults) Level": 7,
+    "Crypt Level": 35,
+    "Army Modernization Strength": "Level V completed",
+    "Monsters Boost Strength": "Level III completed",
+    "Mighty Level": 355200,
+    "Hero Level": 230,
+    "Main Battle Captain Level": 275
+  },
+  {
+    "Timestamp": "2026-03-30 08:11:08.155000",
+    "Player In-Game Name": "Ruby",
+    "Which Clan are you?": "[WoA] Warriors of Asgard",
+    "Guards Level": 6,
+    "Specialist Level": 6,
+    "Monster Level": 6,
+    "Engineer (Catapults) Level": 6,
+    "Crypt Level": 25,
+    "Army Modernization Strength": "Level III completed",
+    "Monsters Boost Strength": "Level II completed",
+    "Mighty Level": 210400,
+    "Hero Level": 180,
+    "Main Battle Captain Level": 220
+  },
+  {
+    "Timestamp": "2026-03-30 08:12:08.155000",
+    "Player In-Game Name": "Golden",
+    "Which Clan are you?": "[WoA] Warriors of Asgard",
+    "Guards Level": 5,
+    "Specialist Level": 5,
+    "Monster Level": 5,
+    "Engineer (Catapults) Level": 5,
+    "Crypt Level": 20,
+    "Army Modernization Strength": "Level II completed",
+    "Monsters Boost Strength": "Level I completed",
+    "Mighty Level": 160900,
+    "Hero Level": 150,
+    "Main Battle Captain Level": 188
+  },
+  {
+    "Timestamp": "2026-03-30 08:13:08.155000",
+    "Player In-Game Name": "Tinman",
+    "Which Clan are you?": "[WoA] Warriors of Asgard",
+    "Guards Level": 4,
+    "Specialist Level": 4,
+    "Monster Level": 4,
+    "Engineer (Catapults) Level": 4,
+    "Crypt Level": 15,
+    "Army Modernization Strength": "Level I completed",
+    "Monsters Boost Strength": "Not Yet Started",
+    "Mighty Level": 95000,
+    "Hero Level": 130,
+    "Main Battle Captain Level": 140
+  }
+];
+
+const ARMY_LEVELS = [
+  "Not Yet Started",
+  "Level I (in progress)",
+  "Level I completed",
+  "Level II completed",
+  "Level III completed",
+  "Level IV completed",
+  "Level V completed"
+];
+
+const MONSTER_BOOST_LEVELS = [
+  "Not Yet Started",
+  "Level I (in progress)",
+  "Level I completed",
+  "Level II completed",
+  "Level III completed"
+];
+
+let state = {
+  raw: [],
+  filtered: [],
+  charts: {}
+};
+
+function num(v) {
+  if (v === null || v === undefined || v === "") return 0;
+  const n = Number(String(v).replace(/,/g, "").trim());
+  return Number.isFinite(n) ? n : 0;
+}
+
+function txt(v) {
+  return String(v ?? "").trim();
+}
+
+function getBand(guards) {
+  if (guards >= 8) return "Strong";
+  if (guards >= 6) return "Mid";
+  return "Small";
+}
+
+function getBandClass(tier) {
+  if (tier === "Strong") return "green-b";
+  if (tier === "Mid") return "orange-b";
+  return "red-b";
+}
+
+function getCryptClass(crypt) {
+  if (crypt < 20) return "red-b";
+  if (crypt < 30) return "orange-b";
+  return "green-b";
+}
+
+function normalizeRows(rows) {
+  return rows.map((r, idx) => {
+    const player = txt(r["Player In-Game Name"] || r["Player"] || `Player ${idx + 1}`);
+    const clan = txt(r["Which Clan are you?"] || r["Clan"] || "Unknown");
+    const guards = num(r["Guards Level"] || r["Guards"]);
+    const specialists = num(r["Specialist Level"] || r["Specialists"]);
+    const monsters = num(r["Monster Level"] || r["Monsters"]);
+    const engineer = num(r["Engineer (Catapults) Level"] || r["Engineer"]);
+    const crypt = num(r["Crypt Level"] || r["Crypt"]);
+    const mighty = num(r["Mighty Level"] || r["Mighty"]);
+    const captain = num(r["Main Battle Captain Level"] || r["Captain"] || r["Captain Level"]);
+    const hero = num(r["Hero Level"] || r["Hero"]);
+    const army = txt(r["Army Modernization Strength"]);
+    const monsterBoost = txt(r["Monsters Boost Strength"]);
+    const tier = getBand(guards);
+
+    return {
+      id: idx + 1,
+      player,
+      clan,
+      guards,
+      specialists,
+      monsters,
+      engineer,
+      crypt,
+      mighty,
+      captain,
+      hero,
+      army,
+      monsterBoost,
+      tier
+    };
+  }).sort((a, b) => (b.guards - a.guards) || (b.mighty - a.mighty) || (b.crypt - a.crypt));
+}
+
+async function loadData() {
+  if (DATA_SOURCE_URL) {
+    try {
+      const res = await fetch(DATA_SOURCE_URL, { cache: "no-store" });
+      const rows = await res.json();
+      if (Array.isArray(rows) && rows.length) return rows;
+    } catch (e) {
+      console.warn("Live source failed, using embedded data.", e);
+    }
+  }
+  return EMBEDDED_DATA;
+}
+
+function fillClanFilter(rows) {
+  const values = ["All", ...new Set(rows.map(r => r.clan))];
+  const sel = document.getElementById("clanFilter");
+  sel.innerHTML = values.map(v => `<option value="${v}">${v}</option>`).join("");
+}
+
+function applyFilters() {
+  const q = txt(document.getElementById("search").value).toLowerCase();
+  const clan = document.getElementById("clanFilter").value;
+  const tier = document.getElementById("tierFilter").value;
+
+  state.filtered = state.raw.filter(r =>
+    (!q || r.player.toLowerCase().includes(q)) &&
+    (clan === "All" || r.clan === clan) &&
+    (tier === "All" || r.tier === tier)
+  );
+
+  renderAll();
+}
+
+function renderKpis(rows) {
+  const total = rows.length;
+  const strong = rows.filter(r => r.tier === "Strong").length;
+  const mid = rows.filter(r => r.tier === "Mid").length;
+  const small = rows.filter(r => r.tier === "Small").length;
+  const cryptNeeds = rows.filter(r => r.crypt < 20).length;
+  const crypt20 = rows.filter(r => r.crypt === 20).length;
+  const crypt25 = rows.filter(r => r.crypt === 25).length;
+  const crypt30 = rows.filter(r => r.crypt === 30).length;
+  const crypt35 = rows.filter(r => r.crypt === 35).length;
+
+  const host = document.getElementById("kpiGrid");
+  const items = [
+    ["Players Submitted", total, "Current filtered view"],
+    ["Strong", strong, "G8–G9"],
+    ["Mid", mid, "G6–G7"],
+    ["Small", small, "G1–G5"],
+    ["Needs Attention", cryptNeeds, "Crypt below 20"],
+    ["Crypt 20", crypt20, "Exact level"],
+    ["Crypt 25", crypt25, "Exact level"],
+    ["Crypt 30 / 35", `${crypt30} / ${crypt35}`, "Exact levels"]
+  ];
+
+  host.innerHTML = items.map(i => `
+    <div class="card kpi">
+      <div class="label">${i[0]}</div>
+      <div class="value">${i[1]}</div>
+      <div class="hint">${i[2]}</div>
+    </div>
+  `).join("");
+}
+
+function ensureChart(key, ctx, config) {
+  if (state.charts[key]) state.charts[key].destroy();
+  state.charts[key] = new Chart(ctx, config);
+}
+
+function chartTextColor() {
+  return "#dbeafe";
+}
+
+function gridColor() {
+  return "rgba(255,255,255,.06)";
+}
+
+function countByOrderedLevels(rows, field, orderedLevels) {
+  return orderedLevels.map(level =>
+    rows.filter(r => (r[field] || "Not Yet Started") === level).length
+  );
+}
+
+function renderCharts(rows) {
+  const bandLabels = ["Strong", "Mid", "Small"];
+  const bandCounts = bandLabels.map(label => rows.filter(r => r.tier === label).length);
+
+  ensureChart("tier", document.getElementById("tierChart"), {
+    type: "doughnut",
+    data: {
+      labels: bandLabels,
+      datasets: [{
+        data: bandCounts,
+        backgroundColor: ["#16a34a", "#f59e0b", "#ef4444"]
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: "bottom",
+          labels: { color: chartTextColor() }
+        }
+      }
+    }
+  });
+
+  const levels = [1,2,3,4,5,6,7,8,9];
+  const makeCounts = key => levels.map(l => rows.filter(r => r[key] === l).length);
+
+  ensureChart("troop", document.getElementById("troopChart"), {
+    type: "bar",
+    data: {
+      labels: levels.map(l => `G${l}`),
+      datasets: [
+        { label: "Guards", data: makeCounts("guards"), backgroundColor: "#60a5fa" },
+        { label: "Specialists", data: makeCounts("specialists"), backgroundColor: "#16a34a" },
+        { label: "Monsters", data: makeCounts("monsters"), backgroundColor: "#f59e0b" },
+        { label: "Engineer", data: makeCounts("engineer"), backgroundColor: "#d5a84e" }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: "bottom",
+          labels: { color: chartTextColor() }
+        }
+      },
+      scales: {
+        x: {
+          ticks: { color: chartTextColor() },
+          grid: { color: gridColor() }
+        },
+        y: {
+          ticks: { color: chartTextColor(), precision: 0 },
+          beginAtZero: true,
+          grid: { color: gridColor() }
+        }
+      }
+    }
+  });
+
+  const cryptLabels = ["<20", "20", "25", "30", "35"];
+  const cryptData = [
+    rows.filter(r => r.crypt < 20).length,
+    rows.filter(r => r.crypt === 20).length,
+    rows.filter(r => r.crypt === 25).length,
+    rows.filter(r => r.crypt === 30).length,
+    rows.filter(r => r.crypt === 35).length
+  ];
+
+  ensureChart("crypt", document.getElementById("cryptChart"), {
+    type: "bar",
+    data: {
+      labels: cryptLabels,
+      datasets: [{
+        label: "Players",
+        data: cryptData,
+        backgroundColor: ["#ef4444", "#f59e0b", "#f59e0b", "#16a34a", "#16a34a"]
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: "bottom",
+          labels: { color: chartTextColor() }
+        }
+      },
+      scales: {
+        x: {
+          ticks: { color: chartTextColor() },
+          grid: { display: false }
+        },
+        y: {
+          ticks: { color: chartTextColor(), precision: 0 },
+          beginAtZero: true,
+          grid: { color: gridColor() }
+        }
+      }
+    }
+  });
+
+  const topMighty = [...rows].sort((a, b) => b.mighty - a.mighty).slice(0, 10);
+
+  ensureChart("mighty", document.getElementById("mightyChart"), {
+    type: "bar",
+    data: {
+      labels: topMighty.map(r => r.player),
+      datasets: [{
+        label: "Mighty",
+        data: topMighty.map(r => r.mighty),
+        backgroundColor: "#60a5fa"
+      }]
+    },
+    options: {
+      indexAxis: "y",
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: "bottom",
+          labels: { color: chartTextColor() }
+        }
+      },
+      scales: {
+        x: {
+          ticks: { color: chartTextColor() },
+          beginAtZero: true,
+          grid: { color: gridColor() }
+        },
+        y: {
+          ticks: { color: chartTextColor() },
+          grid: { display: false }
+        }
+      }
+    }
+  });
+
+  ensureChart("army", document.getElementById("armyChart"), {
+    type: "bar",
+    data: {
+      labels: ARMY_LEVELS,
+      datasets: [{
+        label: "Players",
+        data: countByOrderedLevels(rows, "army", ARMY_LEVELS),
+        backgroundColor: "#d5a84e"
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: "bottom",
+          labels: { color: chartTextColor() }
+        }
+      },
+      scales: {
+        x: {
+          ticks: {
+            color: chartTextColor(),
+            maxRotation: 45,
+            minRotation: 45
+          },
+          grid: { display: false }
+        },
+        y: {
+          ticks: { color: chartTextColor(), precision: 0 },
+          beginAtZero: true,
+          grid: { color: gridColor() }
+        }
+      }
+    }
+  });
+
+  ensureChart("monsterBoost", document.getElementById("monsterBoostChart"), {
+    type: "bar",
+    data: {
+      labels: MONSTER_BOOST_LEVELS,
+      datasets: [{
+        label: "Players",
+        data: countByOrderedLevels(rows, "monsterBoost", MONSTER_BOOST_LEVELS),
+        backgroundColor: "#16a34a"
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: "bottom",
+          labels: { color: chartTextColor() }
+        }
+      },
+      scales: {
+        x: {
+          ticks: {
+            color: chartTextColor(),
+            maxRotation: 45,
+            minRotation: 45
+          },
+          grid: { display: false }
+        },
+        y: {
+          ticks: { color: chartTextColor(), precision: 0 },
+          beginAtZero: true,
+          grid: { color: gridColor() }
+        }
+      }
+    }
+  });
+}
+
+function renderTable(rows) {
+  const body = document.getElementById("powerTableBody");
+
+  body.innerHTML = rows.map((r, i) => {
+    const rowClass = i === 0 ? "top1" : (i < 10 ? "top10" : "");
+
+    return `
+      <tr class="${rowClass}">
+        <td>${i + 1}</td>
+        <td>${r.player}</td>
+        <td><span class="badge ${getBandClass(r.tier)}">${r.tier}</span></td>
+        <td class="center">${r.guards}</td>
+        <td class="center">${r.specialists}</td>
+        <td class="center">${r.monsters}</td>
+        <td class="center">${r.engineer}</td>
+        <td class="center"><span class="badge ${getCryptClass(r.crypt)}">${r.crypt}</span></td>
+        <td class="right">${r.mighty.toLocaleString()}</td>
+        <td class="center">${r.captain}</td>
+        <td class="center">${r.hero}</td>
+      </tr>
+    `;
+  }).join("");
+}
+
+function getAttentionReason(r) {
+  if (r.guards <= 5) return `Guards G${r.guards} below clan minimum G6`;
+  if (r.crypt < 20) return `Crypt ${r.crypt} below clan minimum`;
+  if (r.captain < 145) return `Captain ${r.captain} below minimum 145`;
+  if (r.mighty < 100000) return `Mighty ${r.mighty.toLocaleString()} below 100,000`;
+  if (r.hero < 145) return `Hero ${r.hero} below minimum 145`;
+  return "";
+}
+
+function renderWatchlist(rows) {
+  const body = document.getElementById("watchTableBody");
+  const list = rows
+    .map(r => ({ player: r.player, reason: getAttentionReason(r) }))
+    .filter(x => x.reason)
+    .slice(0, 12);
+
+  body.innerHTML = list.length ? list.map(x => `
+    <tr>
+      <td>${x.player}</td>
+      <td><span class="badge red-b">Needs Attention</span></td>
+      <td>${x.reason}</td>
+    </tr>
+  `).join("") : `
+    <tr>
+      <td colspan="3">No players below clan minimum in the current filter.</td>
+    </tr>
+  `;
+
+  document.getElementById("smallDataNotice").textContent =
+    rows.length < 5
+      ? "Small-data warning: this dashboard is working, but insights improve once more players submit."
+      : "";
+}
+
+function renderAll() {
+  const rows = state.filtered;
+  renderKpis(rows);
+  renderCharts(rows);
+  renderTable(rows);
+  renderWatchlist(rows);
+}
+
+function exportCSV() {
+  const rows = state.filtered;
+  const headers = [
+    "Rank",
+    "Player",
+    "Tier",
+    "Guards",
+    "Specialists",
+    "Monsters",
+    "Engineer",
+    "Crypt",
+    "Mighty",
+    "Captain Level",
+    "Hero Level",
+    "Army Modernization",
+    "Monsters Boost"
+  ];
+
+  const lines = [headers.join(",")];
+
+  rows.forEach((r, i) => {
+    const vals = [
+      i + 1,
+      r.player,
+      r.tier,
+      r.guards,
+      r.specialists,
+      r.monsters,
+      r.engineer,
+      r.crypt,
+      r.mighty,
+      r.captain,
+      r.hero,
+      r.army,
+      r.monsterBoost
+    ].map(v => `"${String(v).replace(/"/g, '""')}"`);
+
+    lines.push(vals.join(","));
+  });
+
+  const blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8;" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "woa_dashboard_export.csv";
+  a.click();
+}
+
+function attachEvents() {
+  document.getElementById("search").addEventListener("input", applyFilters);
+  document.getElementById("clanFilter").addEventListener("change", applyFilters);
+  document.getElementById("tierFilter").addEventListener("change", applyFilters);
+
+  document.getElementById("resetBtn").addEventListener("click", () => {
+    document.getElementById("search").value = "";
+    document.getElementById("clanFilter").value = "All";
+    document.getElementById("tierFilter").value = "All";
+    applyFilters();
+  });
+
+  document.getElementById("exportBtn").addEventListener("click", exportCSV);
+}
+
+async function refreshData() {
+  const rawRows = await loadData();
+  state.raw = normalizeRows(rawRows);
+
+  if (!document.getElementById("clanFilter").options.length) {
+    fillClanFilter(state.raw);
+  } else {
+    const current = document.getElementById("clanFilter").value;
+    fillClanFilter(state.raw);
+    if ([...document.getElementById("clanFilter").options].some(o => o.value === current)) {
+      document.getElementById("clanFilter").value = current;
+    }
+  }
+
+  applyFilters();
+}
+
+(async function init() {
+  attachEvents();
+  await refreshData();
+  setInterval(refreshData, AUTO_REFRESH_MS);
+})();
+</script>
+</body>
+</html>

@@ -261,7 +261,8 @@
       .grid-kpi{
         grid-template-columns:repeat(4,minmax(0,1fr));
       }
-      .charts,.tables{
+      .charts,
+      .tables{
         grid-template-columns:1fr;
       }
     }
@@ -281,7 +282,7 @@
     <section class="hero">
       <small>WOA Command Center</small>
       <h1>Troop &amp; Player Survey Dashboard</h1>
-      <p>Leadership view for troop strength, crypt standards, modernization progress, monster boosts, and ranking. Top 10 rows are highlighted. Dashboard auto-refreshes every 60 seconds.</p>
+      <p>Live overview of player strength, progression, and readiness—built for fast decisions and strategic alignment.</p>
 
       <div class="toolbar">
         <div class="field">
@@ -315,38 +316,39 @@
 
     <section class="charts">
       <div class="card chart-card">
-        <h3>Player Strength Overview</h3>
-        <div class="sub">Strong = G8–G9, Mid = G6–G7, Small = G1–G5.</div>
+        <h3>Player Strength Distribution</h3>
+        <div class="sub">Breakdown of player tiers—highlighting strength concentration and growth gaps</div>
+		 <div class="sub">Strong(G8–G9), Mid(G6–G7), Small(G1–G5)</div>
         <div class="chart-wrap"><canvas id="tierChart"></canvas></div>
       </div>
 
       <div class="card chart-card">
         <h3>Troop Level Distribution</h3>
-        <div class="sub">How many players currently sit at each Guards, Specialists, Monsters, and Engineer level.</div>
+        <div class="sub">Distribution of troop tiers—identify imbalances across guards, specialists, monsters, and engineers.</div>
         <div class="chart-wrap"><canvas id="troopChart"></canvas></div>
       </div>
 
       <div class="card chart-card">
-        <h3>Crypt Level Milestones</h3>
-        <div class="sub">Exact counts at Crypt 20, 25, 30, and 35. Less than 20 needs attention.</div>
+        <h3>Crypt Progression Distribution</h3>
+        <div class="sub">Player spread across key crypt tiers—levels below 20 flagged for immediate improvement</div>
         <div class="chart-wrap"><canvas id="cryptChart"></canvas></div>
       </div>
 
       <div class="card chart-card">
-        <h3>Mighty Overview</h3>
-        <div class="sub">Top 10 mighty accounts in the current filtered view.</div>
+        <h3>Top Mighty Rankings</h3>
+        <div class="sub">Leading players by mighty—setting the benchmark for clan strength.</div>
         <div class="chart-wrap"><canvas id="mightyChart"></canvas></div>
       </div>
 
       <div class="card chart-card">
-        <h3>Army Modernization Progress</h3>
-        <div class="sub">Number of players at each modernization level so leadership can see where to push next.</div>
+        <h3>Army Modernization Status</h3>
+        <div class="sub">Track modernization progress across players—focus upgrades where adoption is lowest</div>
         <div class="chart-wrap"><canvas id="armyChart"></canvas></div>
       </div>
 
       <div class="card chart-card">
         <h3>Monsters Boost Progress</h3>
-        <div class="sub">Number of players at each monsters boost level so leadership can target the bottleneck.</div>
+        <div class="sub">Player distribution across boost levels—highlighting bottlenecks limiting combat output</div>
         <div class="chart-wrap"><canvas id="monsterBoostChart"></canvas></div>
       </div>
     </section>
@@ -354,7 +356,7 @@
     <section class="tables">
       <div class="card table-card">
         <h3>Power Ranking</h3>
-        <div class="sub">Ranked primarily by Guards Level, then Mighty. Clan column removed as requested.</div>
+        <div class="sub">Overall strength ranking based on troop tiers and mighty</div>
         <div class="table-container">
           <table>
             <thead>
@@ -378,8 +380,8 @@
       </div>
 
       <div class="card table-card">
-        <h3>Needs Attention</h3>
-        <div class="sub">Only players below clan minimum are shown here. No duplicates. No leader rows.</div>
+        <h3>Priority Action Required</h3>
+        <div class="sub">Players below minimum standards—require immediate upgrade focus.</div>
         <div class="table-container">
           <table class="mini-table">
             <thead>
@@ -513,6 +515,14 @@
       return String(v ?? "").trim();
     }
 
+    function normalizeKeys(obj) {
+      const newObj = {};
+      Object.keys(obj || {}).forEach(key => {
+        newObj[String(key).trim()] = obj[key];
+      });
+      return newObj;
+    }
+
     function getBand(guards) {
       if (guards >= 8) return "Strong";
       if (guards >= 6) return "Mid";
@@ -532,9 +542,26 @@
     }
 
     function normalizeRows(rows) {
-      return rows.map((r, idx) => {
-        const player = txt(r["Player In-Game Name"] || r["Player"] || `Player ${idx + 1}`);
-        const clan = txt(r["Which Clan are you?"] || r["Clan"] || "Unknown");
+      return rows.map((row, idx) => {
+        const r = normalizeKeys(row);
+
+        const player = txt(
+          r["Player In-Game Name"] ||
+          r["Player Name"] ||
+          r["In-game Name"] ||
+          r["In Game Name"] ||
+          r["Player In Game Name"] ||
+          r["Player"] ||
+          `Player ${idx + 1}`
+        );
+
+        const clan = txt(
+          r["Which Clan are you?"] ||
+          r["Which Clan are you"] ||
+          r["Clan"] ||
+          "Unknown"
+        );
+
         const guards = num(r["Guards Level"] || r["Guards"]);
         const specialists = num(r["Specialist Level"] || r["Specialists"]);
         const monsters = num(r["Monster Level"] || r["Monsters"]);
@@ -617,14 +644,14 @@
 
       const host = document.getElementById("kpiGrid");
       const items = [
-        ["Players Submitted", total, "Current filtered view"],
+        ["Active Player Data", total, "Current filtered view"],
         ["Strong", strong, "G8–G9"],
         ["Mid", mid, "G6–G7"],
         ["Small", small, "G1–G5"],
-        ["Needs Attention", cryptNeeds, "Crypt below 20"],
-        ["Crypt 20", crypt20, "Exact level"],
-        ["Crypt 25", crypt25, "Exact level"],
-        ["Crypt 30 / 35", `${crypt30} / ${crypt35}`, "Exact levels"]
+        ["Critical Gaps(Level 5-15)", cryptNeeds, "Below minimum standards"],
+        ["Crypt Level 20", crypt20, "Baseline Ready"],
+        ["Crypt Level 25", crypt25, "Operational Tier"],
+        ["Crypt Level 30 / 35", `${crypt30} / ${crypt35}`, "High Readiness"]
       ];
 
       host.innerHTML = items.map(i => `
@@ -932,7 +959,7 @@
 
       document.getElementById("smallDataNotice").textContent =
         rows.length < 5
-          ? "Small-data warning: this dashboard is working, but insights improve once more players submit."
+          ? ""
           : "";
     }
 

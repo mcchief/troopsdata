@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>WOA Troop Dashboard</title>
+  <title>WOA Troop & Player Survey Dashboard</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     :root{
       --bg:#06101d;
       --bg2:#0a1630;
-      --panel:rgba(10,18,32,.62);
+      --panel:rgba(10,18,32,.68);
       --panel-soft:rgba(255,255,255,.04);
       --text:#edf4ff;
       --muted:#9db3d3;
@@ -94,7 +94,6 @@
       padding:20px 0 48px;
     }
 
-    /* NORMAL TOP BAR - NOT STICKY */
     .topbar{
       position:relative;
       z-index:10;
@@ -170,7 +169,7 @@
       font-size:.95rem;
       font-weight:800;
       cursor:pointer;
-      transition:transform .2s ease, background .2s ease, border-color .2s ease, box-shadow .2s ease;
+      transition:transform .2s ease, background .2s ease, border-color .2s ease, box-shadow .2s ease, opacity .2s ease;
       backdrop-filter:blur(10px);
     }
 
@@ -362,7 +361,6 @@
       font-weight:900;
     }
 
-    /* NORMAL KPI SECTION - NOT STICKY */
     .sticky-kpis{
       position:relative;
       z-index:1;
@@ -454,376 +452,13 @@
       font-size:.92rem;
     }
 
-    @media (max-width:1300px){
-      .hero-grid{
-        grid-template-columns:1fr;
-      }
-      .hero-pill-row,
-      .hero-note,
-      .status-chip-wrap{
-        justify-self:start;
-        justify-content:flex-start;
-      }
-      .grid-kpi{
-        grid-template-columns:repeat(4,minmax(0,1fr));
-      }
-    }
-
-    @media (max-width:900px){
-      .toolbar{
-        grid-template-columns:1fr 1fr;
-      }
-      .topbar{
-        flex-direction:column;
-        align-items:stretch;
-      }
-      .topbar-actions{
-        justify-content:stretch;
-      }
-      .topbar-actions .btn{
-        flex:1 1 auto;
-      }
-    }
-
-    @media (max-width:760px){
-      .app{
-        width:min(100%, 94vw);
-        padding-top:14px;
-      }
-      .hero{
-        border-radius:24px;
-        padding:20px;
-      }
-      .toolbar{
-        grid-template-columns:1fr;
-      }
-      .grid-kpi{
-        grid-template-columns:repeat(2,minmax(0,1fr));
-      }
-      .brand-title{
-        white-space:normal;
-      }
-      .status-chip{
-        flex-wrap:wrap;
-        white-space:normal;
-      }
-    }
-
-    @media (max-width:480px){
-      .grid-kpi{
-        grid-template-columns:1fr 1fr;
-      }
-      .kpi{
-        min-height:96px;
-        padding:14px;
-      }
-      .hero-copy h1{
-        font-size:1.8rem;
-      }
-    }
-  </style>
-</head>
-<body>
-  <div class="app">
-    <header class="topbar">
-      <div class="brand">
-        <div class="brand-badge">WOA</div>
-        <div class="brand-copy">
-          <span class="eyebrow">WOA Command Center</span>
-          <div class="brand-title">Troop &amp; Player Survey Dashboard</div>
-        </div>
-      </div>
-
-      <div class="topbar-actions">
-        <a class="btn btn-home" href="https://sites.google.com/view/woa-command-center/home">Home</a>
-        <button class="btn btn-ghost" id="refreshBtn" type="button">Refresh</button>
-        <button class="btn btn-ghost" id="exportBtn" type="button">Export CSV</button>
-      </div>
-    </header>
-
-    <section class="hero">
-      <div class="hero-grid">
-        <div class="hero-copy">
-          <span class="eyebrow">Live Readiness Intelligence</span>
-          <h1>Troop &amp; Player Analytics Dashboard</h1>
-          <p>
-            Track player strength, troop progression, crypt readiness, modernization, and boosts in one streamlined dashboard designed for direct access and efficient decision-making.
-          </p>
-        </div>
-
-        <div class="hero-side">
-          <div class="hero-pill-row">
-            <div class="pill">Live Apps Script API</div>
-            <div class="pill">Normal KPI Cards</div>
-            <div class="pill">Clearer Layout</div>
-          </div>
-          <div class="hero-note">
-            Built for speed, clarity, and real-time decision-making during clan operations.
-          </div>
-        </div>
-      </div>
-
-      <div class="toolbar">
-        <div class="field">
-          <label for="search">Search player</label>
-          <input id="search" class="control" placeholder="Type player name..." />
-        </div>
-
-        <div class="field">
-          <label for="clanFilter">Clan</label>
-          <select id="clanFilter" class="control"></select>
-        </div>
-
-        <div class="field">
-          <label for="tierFilter">Player band</label>
-          <select id="tierFilter" class="control">
-            <option value="All">All</option>
-            <option value="Strong">Strong</option>
-            <option value="Mid">Mid</option>
-            <option value="Small">Small</option>
-          </select>
-        </div>
-
-        <button id="resetBtn" class="btn btn-ghost" type="button">Reset Filters</button>
-        <button id="scrollDownBtn" class="btn btn-home" type="button">View Dashboard</button>
-      </div>
-
-      <div class="status-chip-wrap">
-        <div class="status-chip" id="statusChip">
-          <span class="status-dot"></span>
-          <span class="status-text">Source:</span>
-          <span class="status-strong" id="dataSourceStatus">Apps Script API</span>
-          <span class="status-text">• Refresh:</span>
-          <span class="status-strong" id="refreshStatus">Every 60 seconds</span>
-          <span class="status-text">• Updated:</span>
-          <span class="status-strong" id="lastUpdated">Waiting...</span>
-        </div>
-      </div>
-    </section>
-
-    <section class="sticky-kpis">
-      <div class="grid-kpi" id="kpiGrid"></div>
-    </section>
-
-    <section class="section-head" id="dashboardStart">
-      <div>
-        <h2>Clan Intelligence Overview</h2>
-        <p>Monitor troop strength, progression, and readiness to guide strategy and win more fights.</p>
-      </div>
-    </section>
-	    <section class="dashboard-grid">
-      <div class="main-stack">
-        <section class="charts-grid">
-          <article class="panel glass chart-panel span-2">
-            <div class="panel-head">
-              <div>
-                <div class="panel-kicker">Tier Balance</div>
-                <h3>Player Strength Distribution</h3>
-                <p>Strong = G8–G9, Mid = G6–G7, Small = G1–G5.</p>
-              </div>
-              <div class="panel-chip-row">
-                <span class="chip chip-blue">Live</span>
-                <span class="chip">Band View</span>
-              </div>
-            </div>
-            <div class="chart-shell tall">
-              <canvas id="tierChart"></canvas>
-            </div>
-          </article>
-
-          <article class="panel glass chart-panel">
-            <div class="panel-head">
-              <div>
-                <div class="panel-kicker">Troop Mix</div>
-                <h3>Troop Level Distribution</h3>
-                <p>Guards, specialists, monsters, and engineers by level.</p>
-              </div>
-            </div>
-            <div class="chart-shell">
-              <canvas id="troopChart"></canvas>
-            </div>
-          </article>
-
-          <article class="panel glass chart-panel">
-            <div class="panel-head">
-              <div>
-                <div class="panel-kicker">Crypt Readiness</div>
-                <h3>Crypt Progression Distribution</h3>
-                <p>Levels below 20 stand out fast for action.</p>
-              </div>
-            </div>
-            <div class="chart-shell">
-              <canvas id="cryptChart"></canvas>
-            </div>
-          </article>
-
-          <article class="panel glass chart-panel span-2">
-            <div class="panel-head">
-              <div>
-                <div class="panel-kicker">Power Benchmark</div>
-                <h3>Top Might Rankings</h3>
-                <p>Leading players by Might, shown as a horizontal benchmark view.</p>
-              </div>
-              <div class="panel-chip-row">
-                <span class="chip chip-gold">Top 10</span>
-              </div>
-            </div>
-            <div class="chart-shell tall">
-              <canvas id="MightChart"></canvas>
-            </div>
-          </article>
-
-          <article class="panel glass chart-panel">
-            <div class="panel-head">
-              <div>
-                <div class="panel-kicker">Modernization</div>
-                <h3>Army Modernization Status</h3>
-                <p>Quick view of adoption progress across players.</p>
-              </div>
-            </div>
-            <div class="chart-shell">
-              <canvas id="armyChart"></canvas>
-            </div>
-          </article>
-
-          <article class="panel glass chart-panel">
-            <div class="panel-head">
-              <div>
-                <div class="panel-kicker">Boost Progress</div>
-                <h3>Monsters Boost Progress</h3>
-                <p>Shows where boost completion is holding people back.</p>
-              </div>
-            </div>
-            <div class="chart-shell">
-              <canvas id="monsterBoostChart"></canvas>
-            </div>
-          </article>
-        </section>
-
-        <section class="table-zone">
-          <article class="panel glass table-panel">
-            <div class="panel-head">
-              <div>
-                <div class="panel-kicker">Core Ranking</div>
-                <h3>Power Ranking</h3>
-                <p>Overall strength ranking using troop tiers, Might, and progression indicators.</p>
-              </div>
-              <div class="panel-chip-row">
-                <span class="chip chip-green">Top 10 Highlighted</span>
-              </div>
-            </div>
-
-            <div class="table-wrap">
-              <table>
-                <thead>
-                  <tr>
-                    <th>#</th>
-                    <th>Player</th>
-                    <th>Tier</th>
-                    <th class="center">Guards</th>
-                    <th class="center">Specialists</th>
-                    <th class="center">Monsters</th>
-                    <th class="center">Engineer</th>
-                    <th class="center">Crypt</th>
-                    <th class="right">Might</th>
-                    <th class="center">Captain</th>
-                    <th class="center">Hero</th>
-                  </tr>
-                </thead>
-                <tbody id="powerTableBody"></tbody>
-              </table>
-            </div>
-          </article>
-        </section>
-      </div>
-
-      <aside class="side-stack">
-        <article class="panel glass side-panel">
-          <div class="panel-head">
-            <div>
-              <div class="panel-kicker">Attention Queue</div>
-              <h3>Priority Action Required</h3>
-              <p>Players below minimum standards or needing fast follow-up.</p>
-            </div>
-            <div class="panel-chip-row">
-              <span class="chip chip-red">Needs Attention</span>
-            </div>
-          </div>
-
-          <div class="table-wrap compact">
-            <table class="mini-table">
-              <thead>
-                <tr>
-                  <th>Player</th>
-                  <th>Status</th>
-                  <th>Reason</th>
-                </tr>
-              </thead>
-              <tbody id="watchTableBody"></tbody>
-            </table>
-          </div>
-
-          <div class="mini-note" id="smallDataNotice"></div>
-        </article>
-
-        <article class="panel glass side-panel">
-          <div class="panel-head">
-            <div>
-              <div class="panel-kicker">Command Notes</div>
-              <h3>Quick Insights</h3>
-              <p>Auto-updated tactical readout from the current filtered view.</p>
-            </div>
-          </div>
-
-          <div class="insight-list" id="insightList">
-            <div class="insight-card">
-              <div class="insight-title">Awaiting live analysis</div>
-              <div class="insight-copy">Insights will populate once the dashboard loads data.</div>
-            </div>
-          </div>
-        </article>
-      </aside>
-    </section>
-
-    <div class="overlay-state hidden" id="loadingState">
-      <div class="overlay-card glass">
-        <div class="loader-ring"></div>
-        <h3>Loading dashboard</h3>
-        <p>Pulling live troop data and preparing the command view.</p>
-      </div>
-    </div>
-
-    <div class="error-banner hidden" id="errorBanner">
-      <span id="errorText">Unable to load live data. Embedded backup data is being used.</span>
-    </div>
-  </div>
-
-  <style>
-    .dashboard-grid{
-      display:grid;
-      grid-template-columns:minmax(0,1.5fr) minmax(300px,.72fr);
-      gap:18px;
-      align-items:start;
-    }
-
-    .main-stack,
-    .side-stack{
-      display:grid;
-      gap:18px;
-    }
-
-    .charts-grid{
-      display:grid;
-      grid-template-columns:repeat(2,minmax(0,1fr));
-      gap:18px;
-    }
-
     .panel{
       border:1px solid var(--border);
       border-radius:24px;
       padding:18px;
       box-shadow:var(--shadow-soft);
       animation:fadeUp .75s ease both;
+      min-width:0;
     }
 
     .glass{
@@ -831,10 +466,6 @@
         linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02)),
         var(--panel);
       backdrop-filter:blur(var(--blur));
-    }
-
-    .span-2{
-      grid-column:span 2;
     }
 
     .panel-head{
@@ -907,6 +538,21 @@
       color:#fec1c1;
     }
 
+    .vertical-stack{
+      display:grid;
+      gap:18px;
+    }
+
+    .charts-grid{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:18px;
+    }
+
+    .span-2{
+      grid-column:span 2;
+    }
+
     .chart-shell{
       position:relative;
       height:320px;
@@ -920,12 +566,6 @@
       height:360px;
     }
 
-    .table-zone,
-    .table-panel,
-    .side-panel{
-      min-width:0;
-    }
-
     .table-wrap{
       overflow:auto;
       border-radius:18px;
@@ -935,7 +575,7 @@
     }
 
     .table-wrap.compact{
-      max-height:440px;
+      max-height:520px;
     }
 
     table{
@@ -945,7 +585,7 @@
     }
 
     .mini-table{
-      min-width:unset;
+      min-width:700px;
     }
 
     th, td{
@@ -1014,6 +654,39 @@
       line-height:1.5;
     }
 
+    .badge{
+      display:inline-block;
+      border-radius:999px;
+      padding:5px 10px;
+      font-size:.76rem;
+      font-weight:800;
+      white-space:nowrap;
+      border:1px solid rgba(255,255,255,.08);
+    }
+
+    .green-b{
+      background:rgba(34,197,94,.15);
+      color:#b9f7ce;
+    }
+
+    .orange-b{
+      background:rgba(245,158,11,.15);
+      color:#ffd992;
+    }
+
+    .red-b{
+      background:rgba(239,68,68,.15);
+      color:#ffc0c0;
+    }
+
+    .top1{
+      background:rgba(215,173,90,.10);
+    }
+
+    .top10{
+      background:rgba(34,197,94,.05);
+    }
+
     .overlay-state{
       position:fixed;
       inset:0;
@@ -1074,13 +747,51 @@
       font-weight:700;
     }
 
+    .to-top{
+      position:fixed;
+      right:18px;
+      bottom:18px;
+      z-index:96;
+      width:52px;
+      height:52px;
+      border-radius:50%;
+      border:none;
+      background:linear-gradient(135deg,var(--gold),var(--gold-2));
+      color:#151515;
+      font-size:1.4rem;
+      font-weight:900;
+      cursor:pointer;
+      box-shadow:0 12px 30px rgba(215,173,90,.30);
+      display:grid;
+      place-items:center;
+      opacity:0;
+      pointer-events:none;
+      transform:translateY(10px);
+      transition:opacity .25s ease, transform .25s ease;
+    }
+
+    .to-top.show{
+      opacity:1;
+      pointer-events:auto;
+      transform:translateY(0);
+    }
+
     .hidden{
       display:none !important;
     }
 
     @media (max-width:1300px){
-      .dashboard-grid{
+      .hero-grid{
         grid-template-columns:1fr;
+      }
+      .hero-pill-row,
+      .hero-note,
+      .status-chip-wrap{
+        justify-self:start;
+        justify-content:flex-start;
+      }
+      .grid-kpi{
+        grid-template-columns:repeat(4,minmax(0,1fr));
       }
     }
 
@@ -1097,7 +808,44 @@
       }
     }
 
+    @media (max-width:900px){
+      .toolbar{
+        grid-template-columns:1fr 1fr;
+      }
+      .topbar{
+        flex-direction:column;
+        align-items:stretch;
+      }
+      .topbar-actions{
+        justify-content:stretch;
+      }
+      .topbar-actions .btn{
+        flex:1 1 auto;
+      }
+    }
+
     @media (max-width:760px){
+      .app{
+        width:min(100%, 94vw);
+        padding-top:14px;
+      }
+      .hero{
+        border-radius:24px;
+        padding:20px;
+      }
+      .toolbar{
+        grid-template-columns:1fr;
+      }
+      .grid-kpi{
+        grid-template-columns:repeat(2,minmax(0,1fr));
+      }
+      .brand-title{
+        white-space:normal;
+      }
+      .status-chip{
+        flex-wrap:wrap;
+        white-space:normal;
+      }
       .panel{
         padding:15px;
         border-radius:20px;
@@ -1116,8 +864,302 @@
         min-width:620px;
       }
     }
+
+    @media (max-width:480px){
+      .grid-kpi{
+        grid-template-columns:1fr 1fr;
+      }
+      .kpi{
+        min-height:96px;
+        padding:14px;
+      }
+      .hero-copy h1{
+        font-size:1.8rem;
+      }
+      .to-top{
+        right:14px;
+        bottom:14px;
+        width:48px;
+        height:48px;
+      }
+    }
   </style>
-    <script>
+</head>
+<body>
+  <div class="app" id="top">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-badge">WOA</div>
+        <div class="brand-copy">
+          <span class="eyebrow">WOA Command Center</span>
+          <div class="brand-title">Troop &amp; Player Survey Dashboard</div>
+        </div>
+      </div>
+
+      <div class="topbar-actions">
+        <a class="btn btn-home" href="https://sites.google.com/view/woa-command-center/home">Home</a>
+        <button class="btn btn-ghost" id="refreshBtn" type="button">Refresh</button>
+        <button class="btn btn-ghost" id="exportBtn" type="button">Export CSV</button>
+      </div>
+    </header>
+
+    <section class="hero">
+      <div class="hero-grid">
+        <div class="hero-copy">
+          <span class="eyebrow">Live Readiness Intelligence</span>
+          <h1>Troop &amp; Player Analytics Dashboard</h1>
+          <p>
+            Track player strength, troop progression, crypt readiness, modernization, battle captain growth, and overall readiness in one clean command view built for desktop, tablet, and mobile.
+          </p>
+        </div>
+
+        <div class="hero-side">
+          <div class="hero-pill-row">
+            <div class="pill">Vertical Layout</div>
+            <div class="pill">Live Apps Script API</div>
+            <div class="pill">Mobile Safe</div>
+          </div>
+          <div class="hero-note">
+            Built for faster scanning, cleaner readability, and better tactical decisions without side-panel crowding.
+          </div>
+        </div>
+      </div>
+
+      <div class="toolbar">
+        <div class="field">
+          <label for="search">Search player</label>
+          <input id="search" class="control" placeholder="Type player name..." />
+        </div>
+
+        <div class="field">
+          <label for="clanFilter">Clan</label>
+          <select id="clanFilter" class="control"></select>
+        </div>
+
+        <div class="field">
+          <label for="tierFilter">Player band</label>
+          <select id="tierFilter" class="control">
+            <option value="All">All</option>
+            <option value="Strong">Strong</option>
+            <option value="Mid">Mid</option>
+            <option value="Small">Small</option>
+          </select>
+        </div>
+
+        <button id="resetBtn" class="btn btn-ghost" type="button">Reset Filters</button>
+        <button id="scrollDownBtn" class="btn btn-home" type="button">View Dashboard</button>
+      </div>
+
+      <div class="status-chip-wrap">
+        <div class="status-chip" id="statusChip">
+          <span class="status-dot"></span>
+          <span class="status-text">Source:</span>
+          <span class="status-strong" id="dataSourceStatus">Apps Script API</span>
+          <span class="status-text">• Refresh:</span>
+          <span class="status-strong" id="refreshStatus">Every 60 seconds</span>
+          <span class="status-text">• Updated:</span>
+          <span class="status-strong" id="lastUpdated">Waiting...</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="sticky-kpis">
+      <div class="grid-kpi" id="kpiGrid"></div>
+    </section>
+
+    <section class="section-head" id="dashboardStart">
+      <div>
+        <h2>Clan Intelligence Overview</h2>
+        <p>Vertical dashboard flow for easier scanning, faster follow-up, and cleaner presentation across all devices.</p>
+      </div>
+    </section>
+
+    <main class="vertical-stack">
+	      <section class="panel glass">
+        <div class="panel-head">
+          <div>
+            <div class="panel-kicker">Tier Balance</div>
+            <h3>Player Strength Distribution</h3>
+            <p>Strong = G8–G9, Mid = G6–G7, Small = G1–G5.</p>
+          </div>
+          <div class="panel-chip-row">
+            <span class="chip chip-blue">Live</span>
+            <span class="chip">Band View</span>
+          </div>
+        </div>
+        <div class="chart-shell tall">
+          <canvas id="tierChart"></canvas>
+        </div>
+      </section>
+
+      <section class="charts-grid">
+        <article class="panel glass">
+          <div class="panel-head">
+            <div>
+              <div class="panel-kicker">Troop Mix</div>
+              <h3>Troop Level Distribution</h3>
+              <p>Guards, specialists, monsters, and engineers by level.</p>
+            </div>
+          </div>
+          <div class="chart-shell">
+            <canvas id="troopChart"></canvas>
+          </div>
+        </article>
+
+        <article class="panel glass">
+          <div class="panel-head">
+            <div>
+              <div class="panel-kicker">Crypt Readiness</div>
+              <h3>Crypt Progression Distribution</h3>
+              <p>Levels below 20 stand out fast for action.</p>
+            </div>
+          </div>
+          <div class="chart-shell">
+            <canvas id="cryptChart"></canvas>
+          </div>
+        </article>
+      </section>
+
+      <section class="panel glass">
+        <div class="panel-head">
+          <div>
+            <div class="panel-kicker">Power Benchmark</div>
+            <h3>Top Might Rankings</h3>
+            <p>Leading players by Might, shown as a horizontal benchmark view.</p>
+          </div>
+          <div class="panel-chip-row">
+            <span class="chip chip-gold">Top 10</span>
+          </div>
+        </div>
+        <div class="chart-shell tall">
+          <canvas id="mightChart"></canvas>
+        </div>
+      </section>
+
+      <section class="charts-grid">
+        <article class="panel glass">
+          <div class="panel-head">
+            <div>
+              <div class="panel-kicker">Modernization</div>
+              <h3>Army Modernization Status</h3>
+              <p>Quick view of adoption progress across players.</p>
+            </div>
+          </div>
+          <div class="chart-shell">
+            <canvas id="armyChart"></canvas>
+          </div>
+        </article>
+
+        <article class="panel glass">
+          <div class="panel-head">
+            <div>
+              <div class="panel-kicker">Boost Progress</div>
+              <h3>Monsters Boost Progress</h3>
+              <p>Shows where boost completion is holding people back.</p>
+            </div>
+          </div>
+          <div class="chart-shell">
+            <canvas id="monsterBoostChart"></canvas>
+          </div>
+        </article>
+      </section>
+
+      <section class="panel glass">
+        <div class="panel-head">
+          <div>
+            <div class="panel-kicker">Core Ranking</div>
+            <h3>Power Ranking</h3>
+            <p>Overall strength ranking using troop tiers, Might, and progression indicators.</p>
+          </div>
+          <div class="panel-chip-row">
+            <span class="chip chip-green">Top 10 Highlighted</span>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Player</th>
+                <th>Tier</th>
+                <th class="center">Guards</th>
+                <th class="center">Specialists</th>
+                <th class="center">Monsters</th>
+                <th class="center">Engineer</th>
+                <th class="center">Crypt</th>
+                <th class="right">Might</th>
+                <th class="center">Captain</th>
+                <th class="center">Hero</th>
+              </tr>
+            </thead>
+            <tbody id="powerTableBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="panel glass">
+        <div class="panel-head">
+          <div>
+            <div class="panel-kicker">Attention Queue</div>
+            <h3>Priority Action Required</h3>
+            <p>Players below minimum standards or needing fast follow-up.</p>
+          </div>
+          <div class="panel-chip-row">
+            <span class="chip chip-red">Needs Attention</span>
+          </div>
+        </div>
+
+        <div class="table-wrap compact">
+          <table class="mini-table">
+            <thead>
+              <tr>
+                <th>Player</th>
+                <th>Status</th>
+                <th>Reason</th>
+              </tr>
+            </thead>
+            <tbody id="watchTableBody"></tbody>
+          </table>
+        </div>
+
+        <div class="mini-note" id="smallDataNotice"></div>
+      </section>
+
+      <section class="panel glass">
+        <div class="panel-head">
+          <div>
+            <div class="panel-kicker">Command Notes</div>
+            <h3>Quick Insights</h3>
+            <p>Auto-updated tactical readout from the current filtered view.</p>
+          </div>
+        </div>
+
+        <div class="insight-list" id="insightList">
+          <div class="insight-card">
+            <div class="insight-title">Awaiting live analysis</div>
+            <div class="insight-copy">Insights will populate once the dashboard loads data.</div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <div class="overlay-state hidden" id="loadingState">
+      <div class="overlay-card glass">
+        <div class="loader-ring"></div>
+        <h3>Loading dashboard</h3>
+        <p>Pulling live troop data and preparing the command view.</p>
+      </div>
+    </div>
+
+    <div class="error-banner hidden" id="errorBanner">
+      <span id="errorText">Unable to load live data. Embedded backup data is being used.</span>
+    </div>
+  </div>
+
+  <button class="to-top" id="toTopBtn" type="button" aria-label="Back to top">↑</button>
+
+  <script>
     const DATA_SOURCE_URL = "https://script.google.com/macros/s/AKfycbzrD2aIYI8HyZ-hduvLCjVDdIfLs1ymxSYuDLlbYWqjxw-PdfVFAvDJ9HnBSsolxApyFw/exec";
     const AUTO_REFRESH_MS = 60000;
 
@@ -1133,7 +1175,7 @@
         "Crypt Level":30,
         "Army Modernization Strength":"Level IV completed",
         "Monsters Boost Strength":"Level II completed",
-        "Might Level":298535,
+        "Might Level":298535000,
         "Hero Level":220,
         "Main Battle Captain Level":257
       },
@@ -1148,7 +1190,7 @@
         "Crypt Level":35,
         "Army Modernization Strength":"Level V completed",
         "Monsters Boost Strength":"Level III completed",
-        "Might Level":355200,
+        "Might Level":355200000,
         "Hero Level":230,
         "Main Battle Captain Level":275
       },
@@ -1163,7 +1205,7 @@
         "Crypt Level":25,
         "Army Modernization Strength":"Level III completed",
         "Monsters Boost Strength":"Level II completed",
-        "Might Level":210400,
+        "Might Level":210400000,
         "Hero Level":180,
         "Main Battle Captain Level":220
       },
@@ -1178,7 +1220,7 @@
         "Crypt Level":20,
         "Army Modernization Strength":"Level II completed",
         "Monsters Boost Strength":"Level I completed",
-        "Might Level":160900,
+        "Might Level":160900000,
         "Hero Level":150,
         "Main Battle Captain Level":188
       },
@@ -1193,7 +1235,7 @@
         "Crypt Level":15,
         "Army Modernization Strength":"Level I completed",
         "Monsters Boost Strength":"Not Yet Started",
-        "Might Level":95000,
+        "Might Level":95000000,
         "Hero Level":130,
         "Main Battle Captain Level":140
       }
@@ -1280,8 +1322,7 @@
         second: "2-digit"
       });
     }
-
-    function showLoading(show = true) {
+	    function showLoading(show = true) {
       document.getElementById("loadingState").classList.toggle("hidden", !show);
     }
 
@@ -1314,6 +1355,15 @@
       updateStatusChip();
     }
 
+    function getFirstValue(obj, keys) {
+      for (const key of keys) {
+        if (obj[key] !== undefined && obj[key] !== null && String(obj[key]).trim() !== "") {
+          return obj[key];
+        }
+      }
+      return "";
+    }
+
     function normalizeRows(rows) {
       return rows
         .filter(row => row && Object.values(row).some(v => String(v ?? "").trim() !== ""))
@@ -1321,32 +1371,56 @@
           const r = normalizeKeys(row);
 
           const player = txt(
-            r["Player In-Game Name"] ||
-            r["Player Name"] ||
-            r["In-game Name"] ||
-            r["In Game Name"] ||
-            r["Player In Game Name"] ||
-            r["Player"] ||
-            `Player ${idx + 1}`
+            getFirstValue(r, [
+              "Player In-Game Name",
+              "Player Name",
+              "In-game Name",
+              "In Game Name",
+              "Player In Game Name",
+              "Player",
+              "Name"
+            ]) || `Player ${idx + 1}`
           );
 
           const clan = txt(
-            r["Which Clan are you?"] ||
-            r["Which Clan are you"] ||
-            r["Clan"] ||
-            "Unknown"
+            getFirstValue(r, [
+              "Which Clan are you?",
+              "Which Clan are you",
+              "Clan"
+            ]) || "Unknown"
           );
 
-          const guards = num(r["Guards Level"] || r["Guards"]);
-          const specialists = num(r["Specialist Level"] || r["Specialists"]);
-          const monsters = num(r["Monster Level"] || r["Monsters"]);
-          const engineer = num(r["Engineer (Catapults) Level"] || r["Engineer"]);
-          const crypt = num(r["Crypt Level"] || r["Crypt"]);
-          const might = num(r["Might Level"] || r["Might"]);
-          const captain = num(r["Main Battle Captain Level"] || r["Captain"] || r["Captain Level"]);
-          const hero = num(r["Hero Level"] || r["Hero"]);
-          const army = txt(r["Army Modernization Strength"]);
-          const monsterBoost = txt(r["Monsters Boost Strength"]);
+          const guards = num(getFirstValue(r, ["Guards Level", "Guards"]));
+          const specialists = num(getFirstValue(r, ["Specialist Level", "Specialists"]));
+          const monsters = num(getFirstValue(r, ["Monster Level", "Monsters"]));
+          const engineer = num(getFirstValue(r, ["Engineer (Catapults) Level", "Engineer"]));
+          const crypt = num(getFirstValue(r, ["Crypt Level", "Crypt"]));
+          const might = num(getFirstValue(r, ["Might Level", "Might"]));
+
+          const captain = num(getFirstValue(r, [
+            "Main Battle Captain Level",
+            "Main Captain Level",
+            "Battle Captain Level",
+            "Captain Level",
+            "Main Captain",
+            "Captain"
+          ]));
+
+          const hero = num(getFirstValue(r, ["Hero Level", "Hero"]));
+
+          const army = txt(getFirstValue(r, [
+            "Army Modernization Strength",
+            "Army Modernization",
+            "Modernization"
+          ]));
+
+          const monsterBoost = txt(getFirstValue(r, [
+            "Monsters Boost Strength",
+            "Monster Boost Strength",
+            "Monster Boost",
+            "Monsters Boost"
+          ]));
+
           const tier = getBand(guards);
 
           return {
@@ -1426,10 +1500,10 @@
       const mid = rows.filter(r => r.tier === "Mid").length;
       const small = rows.filter(r => r.tier === "Small").length;
       const cryptNeeds = rows.filter(r => r.crypt < 20).length;
+      const captainNeeds = rows.filter(r => r.captain > 0 && r.captain < 145).length;
+      const mightBelow100m = rows.filter(r => r.might > 0 && r.might < 100000000).length;
       const crypt20 = rows.filter(r => r.crypt === 20).length;
-      const crypt25 = rows.filter(r => r.crypt === 25).length;
-      const crypt30 = rows.filter(r => r.crypt === 30).length;
-      const crypt35 = rows.filter(r => r.crypt === 35).length;
+      const crypt25Plus = rows.filter(r => r.crypt >= 25).length;
 
       const host = document.getElementById("kpiGrid");
       const items = [
@@ -1437,10 +1511,10 @@
         ["Strong", strong, "G8–G9 power tier"],
         ["Mid", mid, "G6–G7 operational band"],
         ["Small", small, "G1–G5 development group"],
-        ["Critical Gaps", cryptNeeds, "Crypt below level 20"],
-        ["Crypt Level 20", crypt20, "Baseline ready"],
-        ["Crypt Level 25", crypt25, "Operational tier"],
-        ["Crypt 30 / 35", `${crypt30} / ${crypt35}`, "High readiness band"]
+        ["Crypt Below 20", cryptNeeds, "Immediate readiness gap"],
+        ["Captain Below 145", captainNeeds, "Captain development queue"],
+        ["Below 100M Might", mightBelow100m, "Power baseline gap"],
+        ["Crypt 20 / 25+", `${crypt20} / ${crypt25Plus}`, "Baseline vs advanced readiness"]
       ];
 
       host.innerHTML = items.map((item, idx) => `
@@ -1581,7 +1655,7 @@
 
       const topMight = [...rows].sort((a, b) => b.might - a.might).slice(0, 10);
 
-      ensureChart("might", document.getElementById("MightChart"), {
+      ensureChart("might", document.getElementById("mightChart"), {
         type: "bar",
         data: {
           labels: topMight.map(r => r.player),
@@ -1618,8 +1692,7 @@
           }
         }
       });
-
-      ensureChart("army", document.getElementById("armyChart"), {
+	        ensureChart("army", document.getElementById("armyChart"), {
         type: "bar",
         data: {
           labels: ARMY_LEVELS,
@@ -1688,13 +1761,76 @@
       });
     }
 
+    function renderTable(rows) {
+      const body = document.getElementById("powerTableBody");
+
+      body.innerHTML = rows.map((r, i) => {
+        const rowClass = i === 0 ? "top1" : (i < 10 ? "top10" : "");
+        return `
+          <tr class="${rowClass}">
+            <td>${i + 1}</td>
+            <td>${r.player}</td>
+            <td><span class="badge ${getBandClass(r.tier)}">${r.tier}</span></td>
+            <td class="center">${r.guards}</td>
+            <td class="center">${r.specialists}</td>
+            <td class="center">${r.monsters}</td>
+            <td class="center">${r.engineer}</td>
+            <td class="center"><span class="badge ${getCryptClass(r.crypt)}">${r.crypt}</span></td>
+            <td class="right">${formatFull(r.might)}</td>
+            <td class="center">${r.captain || "-"}</td>
+            <td class="center">${r.hero || "-"}</td>
+          </tr>
+        `;
+      }).join("");
+    }
+
+    function getAttentionReason(r) {
+      const reasons = [];
+
+      if (r.guards > 0 && r.guards <= 5) reasons.push(`Guards G${r.guards} below clan minimum G6`);
+      if (r.crypt > 0 && r.crypt < 20) reasons.push(`Crypt ${r.crypt} below clan minimum`);
+      if (r.captain > 0 && r.captain < 145) reasons.push(`Captain ${r.captain} below minimum 145`);
+      if (r.might > 0 && r.might < 100000000) reasons.push(`Might ${formatFull(r.might)} below 100M`);
+      if (r.hero > 0 && r.hero < 145) reasons.push(`Hero ${r.hero} below minimum 145`);
+
+      return reasons.join(" | ");
+    }
+
+    function renderWatchlist(rows) {
+      const body = document.getElementById("watchTableBody");
+
+      const list = rows
+        .map(r => ({
+          player: r.player,
+          reason: getAttentionReason(r)
+        }))
+        .filter(x => x.reason);
+
+      body.innerHTML = list.length
+        ? list.map(x => `
+            <tr>
+              <td>${x.player}</td>
+              <td><span class="badge red-b">Needs Attention</span></td>
+              <td>${x.reason}</td>
+            </tr>
+          `).join("")
+        : `<tr><td colspan="3">No players below clan minimum in the current filter.</td></tr>`;
+
+      document.getElementById("smallDataNotice").textContent =
+        rows.length
+          ? `Showing ${rows.length.toLocaleString()} filtered player record(s). Live refresh runs every 60 seconds.`
+          : "No records match the current filter selection.";
+    }
+
     function renderInsights(rows) {
       const total = rows.length;
-      const belowCrypt20 = rows.filter(r => r.crypt < 20).length;
+      const belowCrypt20 = rows.filter(r => r.crypt > 0 && r.crypt < 20).length;
       const strongCount = rows.filter(r => r.tier === "Strong").length;
       const avgMight = total ? Math.round(rows.reduce((sum, r) => sum + r.might, 0) / total) : 0;
       const topPlayer = [...rows].sort((a, b) => b.might - a.might)[0];
-      const belowCaptain145 = rows.filter(r => r.captain < 145).length;
+      const belowCaptain145 = rows.filter(r => r.captain > 0 && r.captain < 145).length;
+      const below100m = rows.filter(r => r.might > 0 && r.might < 100000000).length;
+      const captainKnown = rows.filter(r => r.captain > 0).length;
 
       const insights = [
         {
@@ -1713,7 +1849,13 @@
         },
         {
           title: "Captain readiness",
-          copy: `${belowCaptain145} player(s) are below Captain 145 and may need focused development support.`
+          copy: captainKnown
+            ? `${belowCaptain145} player(s) are below Captain 145 out of ${captainKnown} player(s) with captain data loaded.`
+            : "No captain data is currently available in this filtered view."
+        },
+        {
+          title: "Might baseline watch",
+          copy: `${below100m} player(s) are below the 100M Might baseline and may need focused growth support.`
         }
       ];
 
@@ -1724,99 +1866,6 @@
           <div class="insight-copy">${item.copy}</div>
         </div>
       `).join("");
-    }
-
-    function attachEvents() {
-      document.getElementById("search").addEventListener("input", applyFilters);
-      document.getElementById("clanFilter").addEventListener("change", applyFilters);
-      document.getElementById("tierFilter").addEventListener("change", applyFilters);
-
-      document.getElementById("resetBtn").addEventListener("click", () => {
-        document.getElementById("search").value = "";
-        document.getElementById("clanFilter").value = "All";
-        document.getElementById("tierFilter").value = "All";
-        applyFilters();
-      });
-
-      document.getElementById("refreshBtn").addEventListener("click", async () => {
-        showLoading(true);
-        await refreshData();
-        showLoading(false);
-      });
-
-      document.getElementById("scrollDownBtn").addEventListener("click", () => {
-        document.getElementById("dashboardStart").scrollIntoView({ behavior: "smooth", block: "start" });
-      });
-    }
-
-    async function refreshData() {
-      showError("");
-      const rawRows = await loadData();
-      state.raw = normalizeRows(rawRows);
-      fillClanFilter(state.raw);
-      setLastUpdated(new Date());
-      applyFilters();
-    }
-	    function renderTable(rows) {
-      const body = document.getElementById("powerTableBody");
-
-      body.innerHTML = rows.map((r, i) => {
-        const rowClass = i === 0 ? "top1" : (i < 10 ? "top10" : "");
-        return `
-          <tr class="${rowClass}">
-            <td>${i + 1}</td>
-            <td>${r.player}</td>
-            <td><span class="badge ${getBandClass(r.tier)}">${r.tier}</span></td>
-            <td class="center">${r.guards}</td>
-            <td class="center">${r.specialists}</td>
-            <td class="center">${r.monsters}</td>
-            <td class="center">${r.engineer}</td>
-            <td class="center"><span class="badge ${getCryptClass(r.crypt)}">${r.crypt}</span></td>
-            <td class="right">${formatFull(r.might)}</td>
-            <td class="center">${r.captain}</td>
-            <td class="center">${r.hero}</td>
-          </tr>
-        `;
-      }).join("");
-    }
-
-    function getAttentionReason(r) {
-      const reasons = [];
-
-      if (r.guards <= 5) reasons.push(`Guards G${r.guards} below clan minimum G6`);
-      if (r.crypt < 20) reasons.push(`Crypt ${r.crypt} below clan minimum`);
-      if (r.captain < 145) reasons.push(`Captain ${r.captain} below minimum 145`);
-      if (r.might < 100000) reasons.push(`Might ${formatFull(r.might)} below 100,000`);
-      if (r.hero < 145) reasons.push(`Hero ${r.hero} below minimum 145`);
-
-      return reasons.join(" | ");
-    }
-
-    function renderWatchlist(rows) {
-      const body = document.getElementById("watchTableBody");
-
-      const list = rows
-        .map(r => ({
-          player: r.player,
-          reason: getAttentionReason(r)
-        }))
-        .filter(x => x.reason)
-        .slice(0, 12);
-
-      body.innerHTML = list.length
-        ? list.map(x => `
-            <tr>
-              <td>${x.player}</td>
-              <td><span class="badge red-b">Needs Attention</span></td>
-              <td>${x.reason}</td>
-            </tr>
-          `).join("")
-        : `<tr><td colspan="3">No players below clan minimum in the current filter.</td></tr>`;
-
-      document.getElementById("smallDataNotice").textContent =
-        rows.length
-          ? `Showing ${rows.length.toLocaleString()} filtered player record(s). Live refresh runs every 60 seconds.`
-          : "No records match the current filter selection.";
     }
 
     function renderAll() {
@@ -1864,7 +1913,7 @@
           r.hero,
           r.army,
           r.monsterBoost
-        ].map(v => `"${String(v).replace(/"/g, '""')}"`);
+        ].map(v => `"${String(v ?? "").replace(/"/g, '""')}"`);
 
         lines.push(vals.join(","));
       });
@@ -1877,7 +1926,54 @@
       URL.revokeObjectURL(a.href);
     }
 
-    document.getElementById("exportBtn").addEventListener("click", exportCSV);
+    async function refreshData() {
+      showError("");
+      const rawRows = await loadData();
+      state.raw = normalizeRows(rawRows);
+      fillClanFilter(state.raw);
+      setLastUpdated(new Date());
+      applyFilters();
+    }
+
+    function handleToTopVisibility() {
+      const btn = document.getElementById("toTopBtn");
+      if (window.scrollY > 500) {
+        btn.classList.add("show");
+      } else {
+        btn.classList.remove("show");
+      }
+    }
+
+    function attachEvents() {
+      document.getElementById("search").addEventListener("input", applyFilters);
+      document.getElementById("clanFilter").addEventListener("change", applyFilters);
+      document.getElementById("tierFilter").addEventListener("change", applyFilters);
+
+      document.getElementById("resetBtn").addEventListener("click", () => {
+        document.getElementById("search").value = "";
+        document.getElementById("clanFilter").value = "All";
+        document.getElementById("tierFilter").value = "All";
+        applyFilters();
+      });
+
+      document.getElementById("refreshBtn").addEventListener("click", async () => {
+        showLoading(true);
+        await refreshData();
+        showLoading(false);
+      });
+
+      document.getElementById("scrollDownBtn").addEventListener("click", () => {
+        document.getElementById("dashboardStart").scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+
+      document.getElementById("exportBtn").addEventListener("click", exportCSV);
+
+      document.getElementById("toTopBtn").addEventListener("click", () => {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      });
+
+      window.addEventListener("scroll", handleToTopVisibility);
+    }
 
     (async function init() {
       try {
@@ -1885,6 +1981,7 @@
         attachEvents();
         updateStatusChip();
         await refreshData();
+        handleToTopVisibility();
 
         setInterval(async () => {
           await refreshData();
@@ -1897,40 +1994,5 @@
       }
     })();
   </script>
-
-  <style>
-    .badge{
-      display:inline-block;
-      border-radius:999px;
-      padding:5px 10px;
-      font-size:.76rem;
-      font-weight:800;
-      white-space:nowrap;
-      border:1px solid rgba(255,255,255,.08);
-    }
-
-    .green-b{
-      background:rgba(34,197,94,.15);
-      color:#b9f7ce;
-    }
-
-    .orange-b{
-      background:rgba(245,158,11,.15);
-      color:#ffd992;
-    }
-
-    .red-b{
-      background:rgba(239,68,68,.15);
-      color:#ffc0c0;
-    }
-
-    .top1{
-      background:rgba(215,173,90,.10);
-    }
-
-    .top10{
-      background:rgba(34,197,94,.05);
-    }
-  </style>
 </body>
 </html>

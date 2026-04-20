@@ -1822,50 +1822,53 @@
           : "No records match the current filter selection.";
     }
 
-    function renderInsights(rows) {
-      const total = rows.length;
-      const belowCrypt20 = rows.filter(r => r.crypt > 0 && r.crypt < 20).length;
-      const strongCount = rows.filter(r => r.tier === "Strong").length;
-      const avgMight = total ? Math.round(rows.reduce((sum, r) => sum + r.might, 0) / total) : 0;
-      const topPlayer = [...rows].sort((a, b) => b.might - a.might)[0];
-      const belowCaptain145 = rows.filter(r => r.captain > 0 && r.captain < 145).length;
-      const below100m = rows.filter(r => r.might > 0 && r.might < 100000000).length;
-      const captainKnown = rows.filter(r => r.captain > 0).length;
+  function renderInsights(rows) {
+  const total = rows.length;
 
-      const insights = [
-        {
-          title: "Top benchmark player",
-          copy: topPlayer
-            ? `${topPlayer.player} is currently leading this filtered view with ${formatFull(topPlayer.might)} Might.`
-            : "No player data available in the current filter."
-        },
-        {
-          title: "Crypt readiness pulse",
-          copy: `${belowCrypt20} player(s) are below Crypt 20. That is the cleanest fast-win upgrade queue right now.`
-        },
-        {
-          title: "Power concentration",
-          copy: `${strongCount} strong-tier player(s) are in this view. Average Might sits at ${formatFull(avgMight)}.`
-        },
-        {
-          title: "Captain readiness",
-          copy: captainKnown
-            ? `${belowCaptain145} player(s) are below Captain 145 out of ${captainKnown} player(s) with captain data loaded.`
-            : "No captain data is currently available in this filtered view."
-        },
-        {
-          title: "Might baseline watch",
-          copy: `${below100m} player(s) are below the 100M Might baseline and may need focused growth support.`
-        }
-      ];
+  const belowCrypt20 = rows.filter(r => r.crypt > 0 && r.crypt < 20).length;
+  const strongCount = rows.filter(r => r.tier === "Strong").length;
+  const avgMight = total ? Math.round(rows.reduce((sum, r) => sum + r.might, 0) / total) : 0;
+  const topPlayer = [...rows].sort((a, b) => b.might - a.might)[0];
 
-      const host = document.getElementById("insightList");
-      host.innerHTML = insights.map(item => `
-        <div class="insight-card">
-          <div class="insight-title">${item.title}</div>
-          <div class="insight-copy">${item.copy}</div>
-        </div>
-      `).join("");
+  // 🔴 ENFORCEMENT LOGIC
+  const heroBelow = rows.filter(r => r.hero > 0 && r.hero < 145).length;
+  const mightBelow = rows.filter(r => r.might > 0 && r.might < 100000000).length;
+  const guardsBelow = rows.filter(r => r.guards > 0 && r.guards < 6).length;
+
+  const enforcement = rows.filter(r =>
+    (r.hero > 0 && r.hero < 145) ||
+    (r.might > 0 && r.might < 100000000) ||
+    (r.guards > 0 && r.guards < 6)
+  ).length;
+
+  const insights = [
+    {
+      title: "Top benchmark player",
+      copy: topPlayer
+        ? `${topPlayer.player} is currently leading this filtered view with ${formatFull(topPlayer.might)} Might.`
+        : "No player data available in the current filter."
+    },
+    {
+      title: "Crypt readiness pulse",
+      copy: `${belowCrypt20} player(s) are below Crypt 20. That is the cleanest fast-win upgrade queue right now.`
+    },
+    {
+      title: "Power concentration",
+      copy: `${strongCount} strong-tier player(s) are in this view. Average Might sits at ${formatFull(avgMight)}.`
+    },
+    {
+      title: "Enforcement queue",
+      copy: `${enforcement} player(s) below minimum standards. Hero <145: ${heroBelow} | Might <100M: ${mightBelow} | Guards <G6: ${guardsBelow}. Immediate follow-up required.`
+    }
+  ];
+
+  const host = document.getElementById("insightList");
+  host.innerHTML = insights.map(item => `
+    <div class="insight-card">
+      <div class="insight-title">${item.title}</div>
+      <div class="insight-copy">${item.copy}</div>
+    </div>
+  `).join("");
     }
 
     function renderAll() {

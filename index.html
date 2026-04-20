@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>WOA Troop & Player Survey Dashboard</title>
+  <title>Clan Troop Insights Dashboard</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     :root{
@@ -94,6 +94,7 @@
       padding:20px 0 48px;
     }
 
+    /* STATIC TOP BAR */
     .topbar{
       position:relative;
       z-index:10;
@@ -108,6 +109,7 @@
       background:rgba(7,17,31,.62);
       backdrop-filter:blur(var(--blur));
       box-shadow:var(--shadow-soft);
+      animation:fadeUp .5s ease both;
     }
 
     .brand{
@@ -169,7 +171,7 @@
       font-size:.95rem;
       font-weight:800;
       cursor:pointer;
-      transition:transform .2s ease, background .2s ease, border-color .2s ease, box-shadow .2s ease, opacity .2s ease;
+      transition:transform .2s ease, background .2s ease, border-color .2s ease, box-shadow .2s ease;
       backdrop-filter:blur(10px);
     }
 
@@ -192,6 +194,7 @@
       background:rgba(255,255,255,.03);
     }
 
+    /* STATIC HERO */
     .hero{
       position:relative;
       overflow:hidden;
@@ -361,7 +364,8 @@
       font-weight:900;
     }
 
-    .sticky-kpis{
+    /* NORMAL KPI ROW */
+    .kpi-strip{
       position:relative;
       z-index:1;
       margin-top:18px;
@@ -371,6 +375,7 @@
       background:rgba(8,16,30,.66);
       backdrop-filter:blur(16px);
       box-shadow:var(--shadow-soft);
+      animation:fadeUp .7s ease both;
     }
 
     .grid-kpi{
@@ -547,10 +552,6 @@
       display:grid;
       grid-template-columns:repeat(2,minmax(0,1fr));
       gap:18px;
-    }
-
-    .span-2{
-      grid-column:span 2;
     }
 
     .chart-shell{
@@ -799,9 +800,6 @@
       .charts-grid{
         grid-template-columns:1fr;
       }
-      .span-2{
-        grid-column:span 1;
-      }
       .chart-shell,
       .chart-shell.tall{
         height:320px;
@@ -892,7 +890,7 @@
         <div class="brand-badge">WOA</div>
         <div class="brand-copy">
           <span class="eyebrow">WOA Command Center</span>
-          <div class="brand-title">Troop &amp; Player Survey Dashboard</div>
+          <div class="brand-title">Clan Troop Insights Dashboard</div>
         </div>
       </div>
 
@@ -906,10 +904,10 @@
     <section class="hero">
       <div class="hero-grid">
         <div class="hero-copy">
-          <span class="eyebrow">Live Readiness Intelligence</span>
-          <h1>Troop &amp; Player Analytics Dashboard</h1>
+          <span class="eyebrow">Troop Intelligence</span>
+          <h1>Clan Troop Insights Dashboard</h1>
           <p>
-            Track player strength, troop progression, crypt readiness, modernization, battle captain growth, and overall readiness in one clean command view built for desktop, tablet, and mobile.
+            Track player troop strength, crypt readiness, modernization, boost development, and enforcement gaps in one clean command view designed for direct GitHub hosting.
           </p>
         </div>
 
@@ -920,7 +918,7 @@
             <div class="pill">Readiness Tracking</div>
           </div>
           <div class="hero-note">
-            Built for faster scanning, cleaner readability, and better tactical decisions without side-panel crowding.
+            Built as a static full-page dashboard with clean readability across desktop, tablet, and mobile.
           </div>
         </div>
       </div>
@@ -963,14 +961,14 @@
       </div>
     </section>
 
-    <section class="sticky-kpis">
+    <section class="kpi-strip">
       <div class="grid-kpi" id="kpiGrid"></div>
     </section>
 
     <section class="section-head" id="dashboardStart">
       <div>
         <h2>Clan Intelligence Overview</h2>
-        <p>Vertical dashboard flow for easier scanning, faster follow-up, and cleaner presentation across all devices.</p>
+        <p>Static layout with normal dashboard flow for better clarity and no header overlap.</p>
       </div>
     </section>
 
@@ -1500,7 +1498,7 @@
       const mid = rows.filter(r => r.tier === "Mid").length;
       const small = rows.filter(r => r.tier === "Small").length;
       const cryptNeeds = rows.filter(r => r.crypt < 20).length;
-      const captainNeeds = rows.filter(r => r.captain > 0 && r.captain < 145).length;
+      const heroBelow145 = rows.filter(r => r.hero > 0 && r.hero < 145).length;
       const mightBelow100m = rows.filter(r => r.might > 0 && r.might < 100000000).length;
       const crypt20 = rows.filter(r => r.crypt === 20).length;
       const crypt25Plus = rows.filter(r => r.crypt >= 25).length;
@@ -1512,7 +1510,7 @@
         ["Mid", mid, "G6–G7 operational band"],
         ["Small", small, "G1–G5 development group"],
         ["Crypt Below 20", cryptNeeds, "Immediate readiness gap"],
-        ["Captain Below 145", captainNeeds, "Captain development queue"],
+        ["Hero Below 145", heroBelow145, "Hero development queue"],
         ["Below 100M Might", mightBelow100m, "Power baseline gap"],
         ["Crypt 20 / 25+", `${crypt20} / ${crypt25Plus}`, "Baseline vs advanced readiness"]
       ];
@@ -1692,7 +1690,8 @@
           }
         }
       });
-	        ensureChart("army", document.getElementById("armyChart"), {
+
+      ensureChart("army", document.getElementById("armyChart"), {
         type: "bar",
         data: {
           labels: ARMY_LEVELS,
@@ -1760,8 +1759,7 @@
         }
       });
     }
-
-    function renderTable(rows) {
+	    function renderTable(rows) {
       const body = document.getElementById("powerTableBody");
 
       body.innerHTML = rows.map((r, i) => {
@@ -1787,9 +1785,8 @@
     function getAttentionReason(r) {
       const reasons = [];
 
-      if (r.guards > 0 && r.guards <= 5) reasons.push(`Guards G${r.guards} below clan minimum G6`);
+      if (r.guards > 0 && r.guards < 6) reasons.push(`Guards G${r.guards} below clan minimum G6`);
       if (r.crypt > 0 && r.crypt < 20) reasons.push(`Crypt ${r.crypt} below clan minimum`);
-      if (r.captain > 0 && r.captain < 145) reasons.push(`Captain ${r.captain} below minimum 145`);
       if (r.might > 0 && r.might < 100000000) reasons.push(`Might ${formatFull(r.might)} below 100M`);
       if (r.hero > 0 && r.hero < 145) reasons.push(`Hero ${r.hero} below minimum 145`);
 
@@ -1822,53 +1819,51 @@
           : "No records match the current filter selection.";
     }
 
-  function renderInsights(rows) {
-  const total = rows.length;
+    function renderInsights(rows) {
+      const total = rows.length;
+      const belowCrypt20 = rows.filter(r => r.crypt > 0 && r.crypt < 20).length;
+      const strongCount = rows.filter(r => r.tier === "Strong").length;
+      const avgMight = total ? Math.round(rows.reduce((sum, r) => sum + r.might, 0) / total) : 0;
+      const topPlayer = [...rows].sort((a, b) => b.might - a.might)[0];
 
-  const belowCrypt20 = rows.filter(r => r.crypt > 0 && r.crypt < 20).length;
-  const strongCount = rows.filter(r => r.tier === "Strong").length;
-  const avgMight = total ? Math.round(rows.reduce((sum, r) => sum + r.might, 0) / total) : 0;
-  const topPlayer = [...rows].sort((a, b) => b.might - a.might)[0];
+      const heroBelow = rows.filter(r => r.hero > 0 && r.hero < 145).length;
+      const mightBelow = rows.filter(r => r.might > 0 && r.might < 100000000).length;
+      const guardsBelow = rows.filter(r => r.guards > 0 && r.guards < 6).length;
 
-  // 🔴 ENFORCEMENT LOGIC
-  const heroBelow = rows.filter(r => r.hero > 0 && r.hero < 145).length;
-  const mightBelow = rows.filter(r => r.might > 0 && r.might < 100000000).length;
-  const guardsBelow = rows.filter(r => r.guards > 0 && r.guards < 6).length;
+      const enforcement = rows.filter(r =>
+        (r.hero > 0 && r.hero < 145) ||
+        (r.might > 0 && r.might < 100000000) ||
+        (r.guards > 0 && r.guards < 6)
+      ).length;
 
-  const enforcement = rows.filter(r =>
-    (r.hero > 0 && r.hero < 145) ||
-    (r.might > 0 && r.might < 100000000) ||
-    (r.guards > 0 && r.guards < 6)
-  ).length;
+      const insights = [
+        {
+          title: "Top benchmark player",
+          copy: topPlayer
+            ? `${topPlayer.player} is currently leading this filtered view with ${formatFull(topPlayer.might)} Might.`
+            : "No player data available in the current filter."
+        },
+        {
+          title: "Crypt readiness pulse",
+          copy: `${belowCrypt20} player(s) are below Crypt 20. That is the cleanest fast-win upgrade queue right now.`
+        },
+        {
+          title: "Power concentration",
+          copy: `${strongCount} strong-tier player(s) are in this view. Average Might sits at ${formatFull(avgMight)}.`
+        },
+        {
+          title: "Enforcement queue",
+          copy: `${enforcement} player(s) require attention. ${heroBelow} are below Hero 145, ${mightBelow} are below 100M Might, and ${guardsBelow} are below Guards G6. Follow-up required.`
+        }
+      ];
 
-  const insights = [
-    {
-      title: "Top benchmark player",
-      copy: topPlayer
-        ? `${topPlayer.player} is currently leading this filtered view with ${formatFull(topPlayer.might)} Might.`
-        : "No player data available in the current filter."
-    },
-    {
-      title: "Crypt readiness pulse",
-      copy: `${belowCrypt20} player(s) are below Crypt 20. That is the cleanest fast-win upgrade queue right now.`
-    },
-    {
-      title: "Power concentration",
-      copy: `${strongCount} strong-tier player(s) are in this view. Average Might sits at ${formatFull(avgMight)}.`
-    },
-    {
-      title: "Enforcement queue",
-     copy: `${enforcement} player(s) require attention. ${heroBelow} are below Hero 145, ${mightBelow} are below 100M Might, and ${guardsBelow} are below Guards G6. Follow-up required.`
-    }
-  ];
-
-  const host = document.getElementById("insightList");
-  host.innerHTML = insights.map(item => `
-    <div class="insight-card">
-      <div class="insight-title">${item.title}</div>
-      <div class="insight-copy">${item.copy}</div>
-    </div>
-  `).join("");
+      const host = document.getElementById("insightList");
+      host.innerHTML = insights.map(item => `
+        <div class="insight-card">
+          <div class="insight-title">${item.title}</div>
+          <div class="insight-copy">${item.copy}</div>
+        </div>
+      `).join("");
     }
 
     function renderAll() {
@@ -1924,7 +1919,7 @@
       const blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8;" });
       const a = document.createElement("a");
       a.href = URL.createObjectURL(blob);
-      a.download = "woa_troop_dashboard_export.csv";
+      a.download = "clan_troop_insights_dashboard_export.csv";
       a.click();
       URL.revokeObjectURL(a.href);
     }

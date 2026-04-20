@@ -549,9 +549,9 @@
       <div class="hero-grid">
         <div class="hero-copy">
           <span class="eyebrow">Live Readiness Intelligence</span>
-          <h1>Premium Troop Dashboard for Fast Clan Decisions</h1>
+          <h1>Troop & Player Analytics Dashboard</h1>
           <p>
-            Live visibility into player strength, troop progression, crypt readiness, modernization, and boost status.
+           Track player strength, troop progression, crypt readiness, modernization, and boosts in one streamlined dashboard designed for direct access and efficient decision-making.
           </p>
         </div>
 
@@ -562,8 +562,7 @@
             <div class="pill">Glassmorphism UI</div>
           </div>
           <div class="hero-note">
-            This version is rebuilt for direct hosting on GitHub Pages or any static host, then opened as its own page.
-            Cleaner UX, smoother movement, and less Google Sites drama.
+            Built for speed, clarity, and real-time decision-making during clan operations.
           </div>
         </div>
       </div>
@@ -612,8 +611,8 @@
 
     <section class="section-head" id="dashboardStart">
       <div>
-        <h2>Dashboard Views</h2>
-        <p>Premium analytics blocks, upgraded visuals, and smoother responsiveness across devices.</p>
+        <h2>Clan Intelligence Overviews</h2>
+        <p>Monitor troop strength, progression, and readiness to guide strategy and win more fights.</p>
       </div>
     </section>
 	    <section class="dashboard-grid">
@@ -666,15 +665,15 @@
             <div class="panel-head">
               <div>
                 <div class="panel-kicker">Power Benchmark</div>
-                <h3>Top Mighty Rankings</h3>
-                <p>Leading players by mighty, shown as a horizontal benchmark view.</p>
+                <h3>Top Might Rankings</h3>
+                <p>Leading players by Might, shown as a horizontal benchmark view.</p>
               </div>
               <div class="panel-chip-row">
                 <span class="chip chip-gold">Top 10</span>
               </div>
             </div>
             <div class="chart-shell tall">
-              <canvas id="mightyChart"></canvas>
+              <canvas id="MightChart"></canvas>
             </div>
           </article>
 
@@ -711,7 +710,7 @@
               <div>
                 <div class="panel-kicker">Core Ranking</div>
                 <h3>Power Ranking</h3>
-                <p>Overall strength ranking using troop tiers, mighty, and progression indicators.</p>
+                <p>Overall strength ranking using troop tiers, Might, and progression indicators.</p>
               </div>
               <div class="panel-chip-row">
                 <span class="chip chip-green">Top 10 Highlighted</span>
@@ -730,7 +729,7 @@
                     <th class="center">Monsters</th>
                     <th class="center">Engineer</th>
                     <th class="center">Crypt</th>
-                    <th class="right">Mighty</th>
+                    <th class="right">Might</th>
                     <th class="center">Captain</th>
                     <th class="center">Hero</th>
                   </tr>
@@ -1168,7 +1167,7 @@
         "Crypt Level":30,
         "Army Modernization Strength":"Level IV completed",
         "Monsters Boost Strength":"Level II completed",
-        "Mighty Level":298535,
+        "Might Level":298535,
         "Hero Level":220,
         "Main Battle Captain Level":257
       },
@@ -1183,7 +1182,7 @@
         "Crypt Level":35,
         "Army Modernization Strength":"Level V completed",
         "Monsters Boost Strength":"Level III completed",
-        "Mighty Level":355200,
+        "Might Level":355200,
         "Hero Level":230,
         "Main Battle Captain Level":275
       },
@@ -1198,7 +1197,7 @@
         "Crypt Level":25,
         "Army Modernization Strength":"Level III completed",
         "Monsters Boost Strength":"Level II completed",
-        "Mighty Level":210400,
+        "Might Level":210400,
         "Hero Level":180,
         "Main Battle Captain Level":220
       },
@@ -1213,7 +1212,7 @@
         "Crypt Level":20,
         "Army Modernization Strength":"Level II completed",
         "Monsters Boost Strength":"Level I completed",
-        "Mighty Level":160900,
+        "Might Level":160900,
         "Hero Level":150,
         "Main Battle Captain Level":188
       },
@@ -1228,7 +1227,7 @@
         "Crypt Level":15,
         "Army Modernization Strength":"Level I completed",
         "Monsters Boost Strength":"Not Yet Started",
-        "Mighty Level":95000,
+        "Might Level":95000,
         "Hero Level":130,
         "Main Battle Captain Level":140
       }
@@ -1377,7 +1376,7 @@
           const monsters = num(r["Monster Level"] || r["Monsters"]);
           const engineer = num(r["Engineer (Catapults) Level"] || r["Engineer"]);
           const crypt = num(r["Crypt Level"] || r["Crypt"]);
-          const mighty = num(r["Mighty Level"] || r["Mighty"]);
+          const Might = num(r["Might Level"] || r["Might"]);
           const captain = num(r["Main Battle Captain Level"] || r["Captain"] || r["Captain Level"]);
           const hero = num(r["Hero Level"] || r["Hero"]);
           const army = txt(r["Army Modernization Strength"]);
@@ -1393,7 +1392,7 @@
             monsters,
             engineer,
             crypt,
-            mighty,
+            Might,
             captain,
             hero,
             army,
@@ -1403,7 +1402,7 @@
         })
         .sort((a, b) =>
           (b.guards - a.guards) ||
-          (b.mighty - a.mighty) ||
+          (b.Might - a.Might) ||
           (b.crypt - a.crypt)
         );
     }
@@ -1614,15 +1613,15 @@
         }
       });
 
-      const topMighty = [...rows].sort((a, b) => b.mighty - a.mighty).slice(0, 10);
+      const topMight = [...rows].sort((a, b) => b.Might - a.Might).slice(0, 10);
 
-      ensureChart("mighty", document.getElementById("mightyChart"), {
+      ensureChart("Might", document.getElementById("MightChart"), {
         type: "bar",
         data: {
-          labels: topMighty.map(r => r.player),
+          labels: topMight.map(r => r.player),
           datasets: [{
-            label: "Mighty",
-            data: topMighty.map(r => r.mighty),
+            label: "Might",
+            data: topMight.map(r => r.Might),
             backgroundColor: "#6fb0ff",
             borderRadius: 10
           }]
@@ -1727,15 +1726,15 @@
       const total = rows.length;
       const belowCrypt20 = rows.filter(r => r.crypt < 20).length;
       const strongCount = rows.filter(r => r.tier === "Strong").length;
-      const avgMighty = total ? Math.round(rows.reduce((sum, r) => sum + r.mighty, 0) / total) : 0;
-      const topPlayer = [...rows].sort((a, b) => b.mighty - a.mighty)[0];
+      const avgMight = total ? Math.round(rows.reduce((sum, r) => sum + r.Might, 0) / total) : 0;
+      const topPlayer = [...rows].sort((a, b) => b.Might - a.Might)[0];
       const belowCaptain145 = rows.filter(r => r.captain < 145).length;
 
       const insights = [
         {
           title: "Top benchmark player",
           copy: topPlayer
-            ? `${topPlayer.player} is currently leading this filtered view with ${formatFull(topPlayer.mighty)} mighty.`
+            ? `${topPlayer.player} is currently leading this filtered view with ${formatFull(topPlayer.Might)} Might.`
             : "No player data available in the current filter."
         },
         {
@@ -1744,7 +1743,7 @@
         },
         {
           title: "Power concentration",
-          copy: `${strongCount} strong-tier player(s) are in this view. Average mighty sits at ${formatFull(avgMighty)}.`
+          copy: `${strongCount} strong-tier player(s) are in this view. Average Might sits at ${formatFull(avgMight)}.`
         },
         {
           title: "Captain readiness",
@@ -1811,7 +1810,7 @@
             <td class="center">${r.monsters}</td>
             <td class="center">${r.engineer}</td>
             <td class="center"><span class="badge ${getCryptClass(r.crypt)}">${r.crypt}</span></td>
-            <td class="right">${formatFull(r.mighty)}</td>
+            <td class="right">${formatFull(r.Might)}</td>
             <td class="center">${r.captain}</td>
             <td class="center">${r.hero}</td>
           </tr>
@@ -1825,7 +1824,7 @@
       if (r.guards <= 5) reasons.push(`Guards G${r.guards} below clan minimum G6`);
       if (r.crypt < 20) reasons.push(`Crypt ${r.crypt} below clan minimum`);
       if (r.captain < 145) reasons.push(`Captain ${r.captain} below minimum 145`);
-      if (r.mighty < 100000) reasons.push(`Mighty ${formatFull(r.mighty)} below 100,000`);
+      if (r.Might < 100000) reasons.push(`Might ${formatFull(r.Might)} below 100,000`);
       if (r.hero < 145) reasons.push(`Hero ${r.hero} below minimum 145`);
 
       return reasons.join(" | ");
@@ -1879,7 +1878,7 @@
         "Monsters",
         "Engineer",
         "Crypt",
-        "Mighty",
+        "Might",
         "Captain Level",
         "Hero Level",
         "Army Modernization",
@@ -1898,7 +1897,7 @@
           r.monsters,
           r.engineer,
           r.crypt,
-          r.mighty,
+          r.Might,
           r.captain,
           r.hero,
           r.army,

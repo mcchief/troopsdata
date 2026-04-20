@@ -25,7 +25,6 @@
       --shadow-soft:0 10px 30px rgba(0,0,0,.22);
       --blur:16px;
       --max:1480px;
-      --sticky-top:12px;
     }
 
     *{box-sizing:border-box}
@@ -95,10 +94,10 @@
       padding:20px 0 48px;
     }
 
+    /* NORMAL TOP BAR - NOT STICKY */
     .topbar{
-      position:sticky;
-      top:var(--sticky-top);
-      z-index:50;
+      position:relative;
+      z-index:10;
       display:flex;
       align-items:center;
       justify-content:space-between;
@@ -363,10 +362,10 @@
       font-weight:900;
     }
 
+    /* NORMAL KPI SECTION - NOT STICKY */
     .sticky-kpis{
-      position:sticky;
-      top:92px;
-      z-index:40;
+      position:relative;
+      z-index:1;
       margin-top:18px;
       padding:12px;
       border-radius:24px;
@@ -484,9 +483,6 @@
       .topbar-actions .btn{
         flex:1 1 auto;
       }
-      .sticky-kpis{
-        top:12px;
-      }
     }
 
     @media (max-width:760px){
@@ -549,17 +545,17 @@
       <div class="hero-grid">
         <div class="hero-copy">
           <span class="eyebrow">Live Readiness Intelligence</span>
-          <h1>Troop & Player Analytics Dashboard</h1>
+          <h1>Troop &amp; Player Analytics Dashboard</h1>
           <p>
-           Track player strength, troop progression, crypt readiness, modernization, and boosts in one streamlined dashboard designed for direct access and efficient decision-making.
+            Track player strength, troop progression, crypt readiness, modernization, and boosts in one streamlined dashboard designed for direct access and efficient decision-making.
           </p>
         </div>
 
         <div class="hero-side">
           <div class="hero-pill-row">
             <div class="pill">Live Apps Script API</div>
-            <div class="pill">Sticky KPI Strip</div>
-            <div class="pill">Glassmorphism UI</div>
+            <div class="pill">Normal KPI Cards</div>
+            <div class="pill">Clearer Layout</div>
           </div>
           <div class="hero-note">
             Built for speed, clarity, and real-time decision-making during clan operations.
@@ -594,7 +590,7 @@
 
       <div class="status-chip-wrap">
         <div class="status-chip" id="statusChip">
-          <span class="status-dot" id="statusDot"></span>
+          <span class="status-dot"></span>
           <span class="status-text">Source:</span>
           <span class="status-strong" id="dataSourceStatus">Apps Script API</span>
           <span class="status-text">• Refresh:</span>
@@ -611,7 +607,7 @@
 
     <section class="section-head" id="dashboardStart">
       <div>
-        <h2>Clan Intelligence Overviews</h2>
+        <h2>Clan Intelligence Overview</h2>
         <p>Monitor troop strength, progression, and readiness to guide strategy and win more fights.</p>
       </div>
     </section>
@@ -788,10 +784,6 @@
         </article>
       </aside>
     </section>
-
-    <div class="floating-tools">
-      <button class="fab" id="toTopBtn" type="button" aria-label="Back to top">↑</button>
-    </div>
 
     <div class="overlay-state hidden" id="loadingState">
       <div class="overlay-card glass">
@@ -1020,32 +1012,6 @@
       color:var(--muted);
       font-size:.86rem;
       line-height:1.5;
-    }
-
-    .floating-tools{
-      position:fixed;
-      right:16px;
-      bottom:16px;
-      z-index:70;
-    }
-
-    .fab{
-      width:50px;
-      height:50px;
-      border:none;
-      border-radius:50%;
-      cursor:pointer;
-      font-size:1.1rem;
-      font-weight:900;
-      color:#111;
-      background:linear-gradient(135deg,var(--gold),var(--gold-2));
-      box-shadow:0 14px 34px rgba(215,173,90,.28);
-      transition:transform .2s ease, box-shadow .2s ease;
-    }
-
-    .fab:hover{
-      transform:translateY(-2px);
-      box-shadow:0 18px 38px rgba(215,173,90,.35);
     }
 
     .overlay-state{
@@ -1376,7 +1342,7 @@
           const monsters = num(r["Monster Level"] || r["Monsters"]);
           const engineer = num(r["Engineer (Catapults) Level"] || r["Engineer"]);
           const crypt = num(r["Crypt Level"] || r["Crypt"]);
-          const Might = num(r["Might Level"] || r["Might"]);
+          const might = num(r["Might Level"] || r["Might"]);
           const captain = num(r["Main Battle Captain Level"] || r["Captain"] || r["Captain Level"]);
           const hero = num(r["Hero Level"] || r["Hero"]);
           const army = txt(r["Army Modernization Strength"]);
@@ -1392,7 +1358,7 @@
             monsters,
             engineer,
             crypt,
-            Might,
+            might,
             captain,
             hero,
             army,
@@ -1402,7 +1368,7 @@
         })
         .sort((a, b) =>
           (b.guards - a.guards) ||
-          (b.Might - a.Might) ||
+          (b.might - a.might) ||
           (b.crypt - a.crypt)
         );
     }
@@ -1613,15 +1579,15 @@
         }
       });
 
-      const topMight = [...rows].sort((a, b) => b.Might - a.Might).slice(0, 10);
+      const topMight = [...rows].sort((a, b) => b.might - a.might).slice(0, 10);
 
-      ensureChart("Might", document.getElementById("MightChart"), {
+      ensureChart("might", document.getElementById("MightChart"), {
         type: "bar",
         data: {
           labels: topMight.map(r => r.player),
           datasets: [{
             label: "Might",
-            data: topMight.map(r => r.Might),
+            data: topMight.map(r => r.might),
             backgroundColor: "#6fb0ff",
             borderRadius: 10
           }]
@@ -1726,15 +1692,15 @@
       const total = rows.length;
       const belowCrypt20 = rows.filter(r => r.crypt < 20).length;
       const strongCount = rows.filter(r => r.tier === "Strong").length;
-      const avgMight = total ? Math.round(rows.reduce((sum, r) => sum + r.Might, 0) / total) : 0;
-      const topPlayer = [...rows].sort((a, b) => b.Might - a.Might)[0];
+      const avgMight = total ? Math.round(rows.reduce((sum, r) => sum + r.might, 0) / total) : 0;
+      const topPlayer = [...rows].sort((a, b) => b.might - a.might)[0];
       const belowCaptain145 = rows.filter(r => r.captain < 145).length;
 
       const insights = [
         {
           title: "Top benchmark player",
           copy: topPlayer
-            ? `${topPlayer.player} is currently leading this filtered view with ${formatFull(topPlayer.Might)} Might.`
+            ? `${topPlayer.player} is currently leading this filtered view with ${formatFull(topPlayer.might)} Might.`
             : "No player data available in the current filter."
         },
         {
@@ -1781,10 +1747,6 @@
       document.getElementById("scrollDownBtn").addEventListener("click", () => {
         document.getElementById("dashboardStart").scrollIntoView({ behavior: "smooth", block: "start" });
       });
-
-      document.getElementById("toTopBtn").addEventListener("click", () => {
-        window.scrollTo({ top: 0, behavior: "smooth" });
-      });
     }
 
     async function refreshData() {
@@ -1810,7 +1772,7 @@
             <td class="center">${r.monsters}</td>
             <td class="center">${r.engineer}</td>
             <td class="center"><span class="badge ${getCryptClass(r.crypt)}">${r.crypt}</span></td>
-            <td class="right">${formatFull(r.Might)}</td>
+            <td class="right">${formatFull(r.might)}</td>
             <td class="center">${r.captain}</td>
             <td class="center">${r.hero}</td>
           </tr>
@@ -1824,7 +1786,7 @@
       if (r.guards <= 5) reasons.push(`Guards G${r.guards} below clan minimum G6`);
       if (r.crypt < 20) reasons.push(`Crypt ${r.crypt} below clan minimum`);
       if (r.captain < 145) reasons.push(`Captain ${r.captain} below minimum 145`);
-      if (r.Might < 100000) reasons.push(`Might ${formatFull(r.Might)} below 100,000`);
+      if (r.might < 100000) reasons.push(`Might ${formatFull(r.might)} below 100,000`);
       if (r.hero < 145) reasons.push(`Hero ${r.hero} below minimum 145`);
 
       return reasons.join(" | ");
@@ -1897,7 +1859,7 @@
           r.monsters,
           r.engineer,
           r.crypt,
-          r.Might,
+          r.might,
           r.captain,
           r.hero,
           r.army,
@@ -1972,4 +1934,3 @@
   </style>
 </body>
 </html>
-	
